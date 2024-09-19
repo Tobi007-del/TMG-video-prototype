@@ -1,5 +1,6 @@
 *, *::before, *::after {
     box-sizing: border-box;
+    -webkit-user-select: none;
     user-select : none;
 }
 
@@ -44,25 +45,25 @@ body {
     height: var(--controls-size)!important;
 }
 
-.replay-btn-wrapper {
+.replay-btn {
     display: none;
 }
 
-.video-container.replay .replay-btn-wrapper {
+.video-container.replay .replay-btn {
     display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
     width: calc(var(--controls-size)*4);
-    aspect-ratio: 1 / 1;
+    height: calc(var(--controls-size)*4);
     color: white;
     top: 40%;
     border-radius: 50%;
-    background:rgba(0,0,0,0.5);
+    background-color:rgba(0,0,0,0.5);
     z-index: 1;
 }
 
-.replay-btn {
+.replay-btn svg {
     transform: scale(3);
 }
 
@@ -128,19 +129,15 @@ body {
     z-index: -1;
 }
 
-.video-container.mini-player .play-notifier, .video-container.mini-player .pause-notifier, .video-container.mini-player.replay .play-pause-btn {
+.video-container.mini-player .play-notifier, .video-container.mini-player .pause-notifier, .video-container.mini-player.replay .play-pause-btn, .video-container.replay .pause-notifier {
     display: none!important;
 }
 
-.video-container.mini-player .replay-btn-wrapper {
+.video-container.mini-player .replay-btn {
     top: 30%;
 }
 
-.mini-player-expand-btn svg {
-    transform: rotate(-90deg);
-}
-
-.mini-player.mini-player .play-pause-btn svg {
+.mini-player .play-pause-btn svg {
     transform: scale(2);
 }
 
@@ -148,7 +145,6 @@ body {
     display: none;
 }
 
-.video-container.mini-player, 
 .video-container.theater,
 .video-container.full-screen {
     border-radius: 0;
@@ -166,8 +162,8 @@ body {
 }
 
 .video-container.full-screen {
-    max-height: 100vh;
     --controls-size: 30px;
+    max-height: 100vh;
 }
 
 .video-container.full-screen .timeline-container {
@@ -464,7 +460,7 @@ input[type="range"]::-webkit-slider-thumb {
     bottom: calc(var(--controls-size)/-7.5);
 }
 
-video::cue,video::-webkit-media-text-track-display-backdrop,video::-webkit-media-text-track-display {
+video::cue,video::-webkit-media-text-track-display-backdrop, video::-webkit-media-text-track-display {
     background-color: black / .75!important;
     font-size: clamp(15px, calc(var(--controls-size)/1.85), 25px)!important;
     overflow: visible!important;
@@ -638,39 +634,35 @@ video::-webkit-media-text-track-container {
     position: absolute;
     color: white;
 }
-.notifiers svg path {
-    fill: rgba(255, 255, 255, 0.75)!important;
-}
 @keyframes pulse {
     from {
         opacity: 0;
         transform: scale(1);
-    }
-    to {
-        transform: scale(1.5);
+    } to {
         opacity: 1;
+        transform: scale(1.5);
     }
 }
 
-.volume-up-notifier::after,.volume-down-notifier::after {
+.volume-up-notifier::after, .volume-down-notifier::after {
     display: flex;
     content: attr(data-volume);
     position: absolute;
-    width: calc(var(--controls-size)*1.5);
-    height: calc(var(--controls-size)*1.5);
+    width: calc(var(--controls-size)*1.45);
+    height: calc(var(--controls-size)*1.45);
     background: inherit;
     border-radius: inherit;
-    opacity: inherit;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: calc(var(--controls-size)/2);
+    animation: none!important;
 }
 .volume-up-notifier::after {
-    left: 110%;
+    left: 120%;
 }
 .volume-down-notifier::after {
-    right: 110%;
+    right: 120%;
 }
 
 .fwd-notifier {

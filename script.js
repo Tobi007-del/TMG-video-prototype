@@ -1,5 +1,6 @@
 // TODO: alt for shortcuts and custom events for the big notifiers
 
+
 const videos = document.querySelectorAll("video")
 
 videos.forEach((video,i) => {
@@ -119,7 +120,11 @@ videos.forEach((video,i) => {
         //skip variable for time skips
         let skipped;
         
+        //variable to check if video is in view
+        let videoInView = true;
+
         document.addEventListener("keydown", e => {
+        if(videoInView) {
             const tagName = document.activeElement.tagName.toLowerCase()
         
             if(tagName === "input") return
@@ -127,6 +132,7 @@ videos.forEach((video,i) => {
             switch (e.key.toLowerCase()) {
                 case " ":
                     if(tagName === "button") return
+                e.preventDefault()
                 case "p":
                 case "l":
                 case "a":
@@ -144,10 +150,16 @@ videos.forEach((video,i) => {
                     toggleMiniPlayerMode(false)
                     break
                 case "i":
-                    togglePictureInPictureMode()
-                    break
+                    if(!e.shiftKey)
+                        togglePictureInPictureMode()
+                        break
                 case "m":
                     toggleMute()
+                    if(video.muted) fire("volumemuted") 
+                    else fire("volumeup")
+                    break
+                case "c":
+                    toggleCaptions()
                     break
                 case "arrowleft":
                         skip(-5)
@@ -168,21 +180,31 @@ videos.forEach((video,i) => {
                         }
                         fire("fwd")
                         break
-                case "c":
-                    toggleCaptions()
-                    break
                 case "arrowup":
-                    if(video.volume < 1)  video.volume += (video.volume*100).toFixed()%5 ? (0.05 - video.volume%0.05) : 0.05
+                    e.preventDefault()
+                    if(video.volume < 1) {video.volume += (video.volume*100)%5 ? (0.05 - video.volume%0.05) : 0.05}
                     fire("volumeup")
                     break
                 case "arrowdown":
+                    e.preventDefault()
                     if(video.volume == 0) {
                         fire("volumemuted")
                         break
                     }
-                    if(video.volume) video.volume -= (video.volume*100).toFixed()%5 ? (video.volume%0.05) : 0.05
+                    if((video.volume*100).toFixed() == 5) {
+                        fire("volumemuted")
+                        video.volume = 0;
+                        break
+                    }
+                    if(video.volume) {video.volume -= ((video.volume*100).toFixed()%5) ? (video.volume%0.05) : 0.05}
                     fire("volumedown")
             }
+        }
+        })
+
+        //Disabling right click
+        video.addEventListener("contextmenu", (e) => {
+            e.preventDefault()
         })
         
         //Loading 
@@ -356,7 +378,9 @@ videos.forEach((video,i) => {
         fullScreenBtn.addEventListener("click", toggleFullScreenMode)
         video.addEventListener("dblclick", toggleFullScreenMode)
         pictureInPictureBtn.addEventListener("click", togglePictureInPictureMode)
-        miniPlayerExpandBtn.addEventListener("click", () => {toggleMiniPlayerMode(false)})
+        miniPlayerExpandBtn.addEventListener("click", () => {
+            toggleMiniPlayerMode(false) 
+        })
         
         function toggleTheaterMode() {
             videoContainers[i].classList.toggle("theater")
@@ -381,22 +405,20 @@ videos.forEach((video,i) => {
         function toggleMiniPlayerMode(bool = true) {
             if (!bool) {
                 videoContainers[i].classList.remove("mini-player")
+                if(!video.paused) {video.pause()}
                 volumeState()
-                video.addEventListener("click", togglePlay)
                 return
             }
             if (!video.paused && window.innerWidth > mobileThreshold && !document.pictureInPictureElement && !intersect) {
                 videoContainers[i].classList.add("mini-player")
-                video.removeEventListener("click", togglePlay)
             } 
             if ((videoContainers[i].classList.contains("mini-player") && intersect) || (videoContainers[i].classList.contains("mini-player") && window.innerWidth < mobileThreshold)) {
                 videoContainers[i].classList.remove("mini-player")
-                video.addEventListener("click", togglePlay)
             }
             volumeState()
         }
         
-        //Intersection Observer for Mini-player toggle
+        //Intersection Observer Setup to watch the video
         const mobileThreshold = 600
         let intersect = false;
         let videoOptions = {
@@ -415,19 +437,29 @@ videos.forEach((video,i) => {
         }
         const videoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                intersect = entry.isIntersecting
-                toggleMiniPlayerMode()
+                if(entry.target != video) {
+                    intersect = entry.isIntersecting
+                    toggleMiniPlayerMode()
+                } else {
+                    videoInView = entry.isIntersecting
+                }
         })
         }, videoOptions)
         videoObserver.observe(videoContainers[i].parentElement)
+        videoObserver.observe(video)
 
         
         document.addEventListener("fullscreenchange", ()=> {
-            videoContainers[i].classList.toggle("full-screen", document.fullscreenElement)
-            
+            videoContainers[i].classList.toggle("full-screen", document.fullscreenElement)            
+            if(videoContainers[i].classList.contains("mini-player") && videoContainers[i].classList.contains("full-screen")) {
+                videoContainers[i].classList.remove("mini-player")
+            }
         })
         document.addEventListener("webkitfullscreenchange", ()=> {
             videoContainers[i].classList.toggle("full-screen", document.fullscreenElement)
+            if(videoContainers[i].classList.contains("mini-player") && videoContainers[i].classList.contains("full-screen")) {
+                videoContainers[i].classList.remove("mini-player")
+            }
         })
 
         window.addEventListener('resize', () => {
@@ -502,6 +534,7 @@ videos.forEach((video,i) => {
         })
         notifiersContainer.addEventListener("volumemuted", () => {
             notifiersContainer.dataset.currentNotifier = "volumemuted"
+            emptyDataset()
         })
         notifiersContainer.addEventListener("fwd", () => {
             notifiersContainer.querySelectorAll(".fwd-notifier,.bwd-notifier").forEach(elem => {
