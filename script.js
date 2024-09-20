@@ -391,7 +391,7 @@ videos.forEach((video,i) => {
             volumeSlider.value = value
             volumeSlider.dataset.volume = `${value.toFixed()}`
             videoContainers[i].querySelectorAll(".volume-up-notifier,.volume-down-notifier,.volume-muted-notifier").forEach((elem) => {
-                elem.dataset.volume = `${(video.volume*100).toFixed()}%`
+                elem.dataset.volume = `${value.toFixed()}%`
             })
             volumeSlider.style.setProperty("--volume-position", volumePosition)
             volumeSlider.style.setProperty("--volume-percent", volumePercent)
@@ -618,5 +618,3 @@ videos.forEach((video,i) => {
     // }
 })
 
-
- 

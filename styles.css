@@ -40,6 +40,7 @@ body {
     position: relative;
     width: 90vw;
     max-width: 800px;
+    max-height: 80vh;
     display: flex;
     justify-content: center;
     margin-inline: auto;
@@ -147,7 +148,7 @@ body {
     align-items: center;
     bottom: calc(var(--controls-size)*3.35);
     left: calc(var(--controls-size)*7);
-    background: var(--lighter-controls-background);
+    background: var(--controls-background);
     width: calc(var(--controls-size)*2.5);
     height: calc(var(--controls-size)*2.5);
     border-radius: 50%;
@@ -297,8 +298,8 @@ video {
 .video-controls-container .controls {
     display: flex;
     gap: calc(var(--controls-size)/2);
-    margin-inline: calc(var(--controls-size)/1.56);
-    padding: calc(var(--controls-size)/2.4) calc(var(--controls-size)/4.8);
+    margin-inline: calc(var(--controls-size)/1.75);
+    padding: calc(var(--controls-size)/2.5) calc(var(--controls-size)/5);
     align-items: center;
 }
 
@@ -725,15 +726,37 @@ video::-webkit-media-text-track-container {
 }
 .notifiers-container[data-current-notifier = "bwd"] .bwd-notifier {
     display: flex;
-}
-
+} 
 
 
 @media(max-width: 600px) {
     .video-container, .video-container.full-screen, .notifiers {
-        --controls-size: 25px;
+        --controls-size: 22px;
     }
     .theater-btn {
         display: none!important;
     }
+    .video-container {
+        border-radius: 0;
+        max-width: initial;
+        width: 100%;
+    }
+    .video-controls-container .controls, .video-container.full-screen .video-controls-container .controls {
+        gap: calc(var(--controls-size)/2);
+        margin-inline: calc(var(--controls-size)/2.5);
+    }
+    .volume-container {
+        gap: calc(var(--controls-size)/7.5);
+    }
+    .volume-slider {
+        max-width: calc(var(--controls-size)*1.5);
+    }
+    .volume-container:hover .volume-slider,
+    .volume-slider:focus-within {
+        width: calc(var(--controls-size)*1.5);
+    }
+    .duration-container {
+        font-size: calc(var(--controls-size)/1.75);
+    }
 }
+
