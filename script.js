@@ -88,6 +88,7 @@ videos.forEach((video,i) => {
         const fullScreenBtn = videoContainers[i].querySelector(".full-screen-btn")
         const pictureInPictureBtn = videoContainers[i].querySelector(".picture-in-picture-btn")
         const miniPlayerExpandBtn = videoContainers[i].querySelector(".mini-player-expand-btn")
+        const miniPlayerCancelBtn = videoContainers[i].querySelector(".mini-player-cancel-btn")
         const muteBtn = videoContainers[i].querySelector(".mute-btn")
         const captionsBtn = videoContainers[i].querySelector(".captions-btn")
         const speedBtn = videoContainers[i].querySelector(".speed-btn")
@@ -107,13 +108,14 @@ videos.forEach((video,i) => {
             let controlsSize = 25;
             // controlsSize = getComputedStyle(videoContainers[i]).getPropertyValue("--controls-size")
             svgs.forEach(svg => {
+                svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
                 if(!svg.classList.contains("settings-icon"))
                 if(!svg.classList.contains("mini-player-expand-icon"))  
+                if(!svg.classList.contains("mini-player-cancel-icon"))
                 if(!svg.classList.contains("replay-icon")) 
                 if(!svg.classList.contains("fwd-notifier-icon")) 
                 if(!svg.classList.contains("bwd-notifier-icon"))
                     svg.setAttribute("viewBox", `0 0 ${controlsSize} ${controlsSize}`)
-                svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
             })
         }
         controlsResize()
@@ -145,6 +147,9 @@ videos.forEach((video,i) => {
                     break
                 case "t":
                     toggleTheaterMode()
+                    break
+                case "e":
+                    expandMiniPlayer()
                     break
                 case "r":
                     toggleMiniPlayerMode(false)
@@ -379,8 +384,21 @@ videos.forEach((video,i) => {
         video.addEventListener("dblclick", toggleFullScreenMode)
         pictureInPictureBtn.addEventListener("click", togglePictureInPictureMode)
         miniPlayerExpandBtn.addEventListener("click", () => {
+            expandMiniPlayer()
+        })
+        function expandMiniPlayer() {
+            concerned = true
+            toggleMiniPlayerMode(false)
+            window.scroll({
+                top: video.parentNode.offsetTop,
+                left: 0,
+                behavior: "instant",
+            })
+        }
+        miniPlayerCancelBtn.addEventListener("click", () => {
             toggleMiniPlayerMode(false) 
         })
+
         
         function toggleTheaterMode() {
             videoContainers[i].classList.toggle("theater")
@@ -402,10 +420,14 @@ videos.forEach((video,i) => {
             }
         } 
 
+        let concerned = false
         function toggleMiniPlayerMode(bool = true) {
             if (!bool) {
                 videoContainers[i].classList.remove("mini-player")
-                if(!video.paused) {video.pause()}
+                if(!video.paused && !concerned) {
+                    video.pause() 
+                }
+                concerned = false
                 volumeState()
                 return
             }
@@ -414,6 +436,7 @@ videos.forEach((video,i) => {
             } 
             if ((videoContainers[i].classList.contains("mini-player") && intersect) || (videoContainers[i].classList.contains("mini-player") && window.innerWidth < mobileThreshold)) {
                 videoContainers[i].classList.remove("mini-player")
+                if(!video.paused) {video.pause()}
             }
             volumeState()
         }
