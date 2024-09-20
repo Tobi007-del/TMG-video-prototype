@@ -9,6 +9,13 @@
   --lighter-brand-color: #ed8f23;
   --light-lighter-brand-color: gray;
   --current-brand-color: var(--lighter-brand-color);
+  --neutral-controls-background: rgba(0,0,0,.25);
+  --neutral-darker-controls-background: rgba(0,0,0,.75);
+  /* --lighter-controls-background: rgba(226,110,2,.25);
+  --darker-controls-background: rgba(226,110,2,.75); */
+  --lighter-controls-background: var(--neutral-controls-background);
+  --darker-controls-background: var(--neutral-darker-controls-background);
+  --controls-background: rgba(226,110,2,.5);
 }
 
 *:focus {
@@ -19,6 +26,7 @@
 body {
     margin: 0;
     background-color: rgb(10, 10, 10);
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     height: 300vh;
     /* background-color: white; */
 }
@@ -64,7 +72,7 @@ body {
     color: white;
     top: 40%;
     border-radius: 50%;
-    background-color:rgba(0,0,0,0.5);
+    background-color: var(--controls-background);
     z-index: 1;
 }
 
@@ -103,7 +111,7 @@ body {
     opacity: 0;
     color: white;
     top: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
+    background: linear-gradient(to bottom, var(--darker-controls-background), transparent);
     z-index: 1;
 }
 
@@ -139,7 +147,7 @@ body {
     align-items: center;
     bottom: calc(var(--controls-size)*3.35);
     left: calc(var(--controls-size)*7);
-    background: rgba(0,0,0,0.25);
+    background: var(--lighter-controls-background);
     width: calc(var(--controls-size)*2.5);
     height: calc(var(--controls-size)*2.5);
     border-radius: 50%;
@@ -274,7 +282,7 @@ video {
     content: "";
     position: absolute;
     bottom: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    background: linear-gradient(to top, var(--neutral-darker-controls-background-color), transparent);
     width: 100%;
     aspect-ratio: 6 / 1;
     z-index: -1;
@@ -624,6 +632,7 @@ video::-webkit-media-text-track-container {
 }
 
 .notifiers-container {
+    --delay: .5s;
     width: 100%;
     height: 100%;
     display: flex;
@@ -641,10 +650,10 @@ video::-webkit-media-text-track-container {
     --controls-size: 40px;
     width: calc(var(--controls-size)*2);
     height: calc(var(--controls-size)*2);
-    background: rgba(0,0,0,.5);
+    background: var(--controls-background);
     border-radius: 50%;
     opacity: 0;
-    animation: pulse .5s ease;
+    animation: pulse var(--delay) ease;
     position: absolute;
     color: white;
 }
@@ -662,8 +671,8 @@ video::-webkit-media-text-track-container {
     display: flex;
     content: attr(data-volume);
     position: absolute;
-    width: calc(var(--controls-size)*1.45);
-    height: calc(var(--controls-size)*1.45);
+    width: calc(var(--controls-size)*1.5);
+    height: calc(var(--controls-size)*1.5);
     background: inherit;
     border-radius: inherit;
     display: flex;
@@ -678,18 +687,22 @@ video::-webkit-media-text-track-container {
     right: 120%;
 }
 
+.fwd-notifier,.bwd-notifier {
+    height: calc(var(--controls-size)*1.5);
+}
+
 .fwd-notifier {
     right: 15%;
-    height: calc(var(--controls-size)*1.75);
 }
 .fwd-notifier::after,.bwd-notifier::after {
     content: attr(data-skip);
     position: absolute;
-    bottom: -30%;
+    width: fit-content;
+    bottom: -40%;
+    font-size: calc(var(--controls-size)/2.65);
 }
 .bwd-notifier {
     left: 15%;
-    height: calc(var(--controls-size)*1.75);
 }
 
 .notifiers-container[data-current-notifier = "videoplay"] .play-notifier {

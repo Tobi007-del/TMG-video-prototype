@@ -125,7 +125,37 @@ videos.forEach((video,i) => {
         //variable to check if video is in view
         let videoInView = true;
 
-        document.addEventListener("keydown", e => {
+        //a variable containing the delay for all delay required events
+        let notifierDelay = getComputedStyle(notifiersContainer).getPropertyValue("--delay")
+        notifierDelay = notifierDelay.replace("s","")
+        notifierDelay = Number(notifierDelay)*1000
+
+        //a debounce function to prevent execution too many keypresses at a given time
+        const debounceKeyPresses = (mainFunction, delay = notifierDelay) => {
+            let timer;
+            return function(...args) {
+                //Clear the timeout of previeous timer to prevent the execution of 'mainFunction'
+                clearTimeout(timer)
+
+                timer = setTimeout(() => {
+                    mainFunction(...args)
+                }, delay)
+            }
+        }
+        //a throttle function to limit number of clicks in a certain time
+        const throttleKeyPresses = (mainFunction, delay = notifierDelay) => {
+            let runTimerFlag = null;
+            return function(...args) {
+                if (runTimerFlag === null) {
+                    mainFunction(...args)
+                    runTimerFlag = setTimeout(() => {
+                        runTimerFlag = null
+                    }, delay)
+                }
+            }
+        }
+
+        document.addEventListener("keydown", throttleKeyPresses(function(e) {
         if(videoInView) {
             const tagName = document.activeElement.tagName.toLowerCase()
         
@@ -187,7 +217,7 @@ videos.forEach((video,i) => {
                         break
                 case "arrowup":
                     e.preventDefault()
-                    if(video.volume < 1) {video.volume += (video.volume*100)%5 ? (0.05 - video.volume%0.05) : 0.05}
+                    if(video.volume < 1) {video.volume += (video.volume*100)%10 ? (0.1 - video.volume%0.1) : 0.1}
                     fire("volumeup")
                     break
                 case "arrowdown":
@@ -196,16 +226,17 @@ videos.forEach((video,i) => {
                         fire("volumemuted")
                         break
                     }
-                    if((video.volume*100).toFixed() == 5) {
+                    if((video.volume*100).toFixed() == 10) {
                         fire("volumemuted")
                         video.volume = 0;
                         break
                     }
-                    if(video.volume) {video.volume -= ((video.volume*100).toFixed()%5) ? (video.volume%0.05) : 0.05}
+                    if(video.volume) {video.volume -= ((video.volume*100).toFixed()%10) ? (video.volume%0.1) : 0.1}
                     fire("volumedown")
             }
         }
         })
+        )
 
         //Disabling right click
         video.addEventListener("contextmenu", (e) => {
@@ -420,6 +451,7 @@ videos.forEach((video,i) => {
             }
         } 
 
+        //a variable to check if the user is concerned in the current video while in mini-player mode
         let concerned = false
         function toggleMiniPlayerMode(bool = true) {
             if (!bool) {
@@ -574,7 +606,7 @@ videos.forEach((video,i) => {
             emptyDataset()
         })
         const emptyDataset = () => {
-            setTimeout(()=>{notifiersContainer.dataset.currentNotifier = ''},500)
+            setTimeout(()=>{notifiersContainer.dataset.currentNotifier = ''}, notifierDelay)
         }
     // } else {
     //     return
