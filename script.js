@@ -1,112 +1,171 @@
-// TODO: alt for shortcuts and custom events for the big notifiers
-
 
 const videos = document.querySelectorAll("video")
+const mobileThreshold = 500
 
 videos.forEach((video,i) => {
-    // if (video.dataset.controls === "tmg-controls") {
-        // const videoContainers[i] = document.createElement('div')
-        // videoContainers[i].classList = "video-container paused theater"
-        // videoContainers[i].innerHTML = `<div id="balls-container">
-        //     <div id="two-balls"></div>
-        //     <div id="other-two-balls"></div>
-        //     <div id="another-two-balls"></div>
-        // </div>
-        // <img class="thumbnail-img">
-        // <div class="video-controls-container">
-        //     <div class="timeline-container">
-        //         <div class="timeline">
-        //             <div class="preview-img-container"><img class="preview-img"></div>
-        //             <div class="thumb-indicator"></div>
-        //         </div>
-        //     </div>
-        //     <div class="controls">
-        //         <button class="play-pause-btn">
-        //             <svg class="play-icon" viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-        //             </svg>
-        //             <svg class="pause-icon" viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
-        //             </svg>
-        //         </button>
-        //         <div class="volume-container">
-        //             <button class="mute-btn">
-        //                 <svg class="volume-high-icon" viewBox="0 0 24 24">
-        //                     <path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
-        //                 </svg>
-        //                 <svg class="volume-low-icon" viewBox="0 0 24 24">
-        //                     <path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
-        //                 </svg>
-        //                 <svg class="volume-muted-icon" viewBox="0 0 24 24">
-        //                     <path fill="currentColor" d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
-        //                 </svg>
-        //             </button>
-        //             <input class="volume-slider" type="range" min="0" max="100" step="any" value="">
-        //         </div>
-        //         <div class="duration-container">
-        //             <div class="current-time">0.00</div>
-        //             /
-        //             <div class="total-time">0.00</div>
-        //         </div>
-        //         <button class="captions-btn">
-        //             <svg viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
-        //             </svg>
-        //         </button>
-        //         <button class="speed-btn wide-btn">1x</button>
-        //         <button class="mini-player-btn">
-        //             <svg viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"/>
-        //             </svg>
-        //         </button>
-        //         <button class="theater-btn">
-        //             <svg class="tall" viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"/>
-        //             </svg>
-        //              <svg class="wide" viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z"/>
-        //             </svg>
-        //         </button>
-        //         <button class="full-screen-btn">
-        //             <svg class="open" viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-        //             </svg>
-        //             <svg class="close" viewBox="0 0 24 24">
-        //                 <path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
-        //             </svg>
-        //         </button>
-        //     </div>
-        // </div>`
-        // const parentDiv = video.parentNode;
-        // parentDiv.insertBefore(videoContainers[i], video)
-        // videoContainers[i].append(video)
+    if (video.dataset.controls === "tmg-controls") {
+        const videoContainer = document.createElement('div')
+        videoContainer.classList = "video-container paused theater"
+        videoContainer.innerHTML = `<img class="thumbnail-img" alt="movie-image">
+        <div class="notifiers-container" data-current-notifier="">
+            <div class="notifiers play-notifier">
+                <svg class="play-notifier-icon" data-tooltip-text="Play(k)" data-tooltip-position="top">
+                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                </svg>
+            </div>
+            <div class="notifiers pause-notifier">
+                <svg class="pause-notifier-icon" data-tooltip-text="Pause(k)" data-tooltip-position="top">
+                    <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+                </svg>
+            </div>
+            <div class="notifiers volume-up-notifier">
+                <svg class="volume-up-notifier-icon" >
+                    <path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
+                </svg>
+            </div>
+            <div class="notifiers volume-down-notifier">
+                <svg class="volume-down-notifier-icon">
+                    <path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+                </svg>
+            </div>
+            <div class="notifiers volume-muted-notifier">
+                <svg class="volume-muted-notifier-icon">
+                    <path fill="currentColor" d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
+                </svg>
+            </div>
+            <div class="notifiers fwd-notifier">
+                <svg viewBox="0 -960 960 960" class="fwd-notifier-icon">
+                    <path d="M100-240v-480l360 240-360 240Zm400 0v-480l360 240-360 240ZM180-480Zm400 0Zm-400 90 136-90-136-90v180Zm400 0 136-90-136-90v180Z"/>
+                </svg>
+            </div>
+            <div class="notifiers bwd-notifier">
+                <svg viewBox="0 -960 960 960" class="bwd-notifier-icon">
+                    <path d="M860-240 500-480l360-240v480Zm-400 0L100-480l360-240v480Zm-80-240Zm400 0Zm-400 90v-180l-136 90 136 90Zm400 0v-180l-136 90 136 90Z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="mini-player-expand-btn-wrapper">
+            <button class="mini-player-expand-btn" title="Expand mini-player(e)">
+                <svg class="mini-player-expand-icon" viewBox="0 -960 960 960" data-tooltip-text="Expand(e)" data-tooltip-position="top">
+                    <path d="M120-120v-320h80v184l504-504H520v-80h320v320h-80v-184L256-200h184v80H120Z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="mini-player-cancel-btn-wrapper">
+            <button class="mini-player-cancel-btn" title="Remove Mini-player(r)">
+                <svg class="mini-player-cancel-icon" viewBox="0 -960 960 960" data-tooltip-text="Remove(r)" data-tooltip-position="top">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="buffer-container">
+            <div class="ground-buffer"></div>
+            <div class="middle-buffer"></div>
+            <div class="top-buffer"></div>
+        </div>
+        <button class="replay-btn" title="Replay">
+            <svg class="replay-icon" viewBox="0 -960 960 960" data-tooltip-text="Replay" data-tooltip-position="top">
+                <path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/>
+            </svg> 
+        </button>
+        <div class="video-controls-container">
+            <div class="timeline-container">
+                <div class="timeline">
+                    <div class="preview-img-container"><img class="preview-img" alt="Preview-image"></div>
+                    <div class="thumb-indicator"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="play-pause-btn" title="Play/Pause(p,l,a,y)">
+                    <svg class="play-icon" data-tooltip-text="Play(k)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                    </svg>
+                    <svg class="pause-icon" data-tooltip-text="Pause(k)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+                    </svg>
+                </button>
+                <div class="volume-container">
+                    <button class="mute-btn" title="Toggle Volume(m)">
+                        <svg class="volume-high-icon" data-tooltip-text="High Volume" data-tooltip-position="top">
+                            <path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
+                        </svg>
+                        <svg class="volume-low-icon" data-tooltip-text="Low Volume" data-tooltip-position="top">
+                            <path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+                        </svg>
+                        <svg class="volume-muted-icon" data-tooltip-text="Volume Muted" data-tooltip-position="top">
+                            <path fill="currentColor" d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
+                        </svg>
+                    </button>
+                    <input class="volume-slider" type="range" min="0" max="100" step="any" title="Adjust Volume">
+                </div>
+                <div class="duration-container">
+                    <div class="current-time">0.00</div>
+                    /
+                    <div class="total-time">0.00</div>
+                </div>
+                <button class="captions-btn" title="Toggle Closed Captions(c)">
+                    <svg data-tooltip-text="Closed Captions(c)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
+                    </svg>
+                </button>
+                <button class="settings-btn" title="Toggle Settings">
+                    <svg class="settings-icon" viewBox="0 -960 960 960" data-tooltip-text="Settings(s)" data-tooltip-position="top">
+                        <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
+                </button>
+                <button class="speed-btn wide-btn" title="Playback Speed(s)">1x</button>
+                <button class="picture-in-picture-btn" title="Toggle Picture-in-Picture(i)">
+                    <svg data-tooltip-text="Picture-in-Picture(i)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"/>
+                    </svg>
+                </button>
+                <button class="theater-btn" title="Toggle Theater Mode(t)">
+                    <svg class="tall" data-tooltip-text="Theater Mode(t)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"/>
+                    </svg>
+                     <svg class="wide" data-tooltip-text="Normal Mode(t)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z"/>
+                    </svg>
+                </button>
+                <button class="full-screen-btn" title="ToggleFull Screen(f)">
+                    <svg class="open" data-tooltip-text="Enter Full Screen(f)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                    <svg class="close" data-tooltip-text="Leave Full Screen(f)" data-tooltip-position="top">
+                        <path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>`
+        const parentDiv = video.parentNode;
+        parentDiv.insertBefore(videoContainer, video)
+        videoContainer.append(video)
 
         const videoContainers = document.querySelectorAll(".video-container")
-        const replayBtn = videoContainers[i].querySelector(".replay-btn") 
-        const playPauseBtn = videoContainers[i].querySelector(".play-pause-btn")
-        const theaterBtn = videoContainers[i].querySelector(".theater-btn")
-        const fullScreenBtn = videoContainers[i].querySelector(".full-screen-btn")
-        const pictureInPictureBtn = videoContainers[i].querySelector(".picture-in-picture-btn")
-        const miniPlayerExpandBtn = videoContainers[i].querySelector(".mini-player-expand-btn")
-        const miniPlayerCancelBtn = videoContainers[i].querySelector(".mini-player-cancel-btn")
-        const muteBtn = videoContainers[i].querySelector(".mute-btn")
-        const captionsBtn = videoContainers[i].querySelector(".captions-btn")
-        const speedBtn = videoContainers[i].querySelector(".speed-btn")
-        const currentTimeElem = videoContainers[i].querySelector(".current-time")
-        const totalTimeElem = videoContainers[i].querySelector(".total-time")
-        const previewImg = videoContainers[i].querySelector(".preview-img")
-        const thumbnailImg = videoContainers[i].querySelector(".thumbnail-img")
-        const volumeSlider = videoContainers[i].querySelector(".volume-slider")
-        const previewImgContainer = videoContainers[i].querySelector(".preview-img-container")
-        const timelineContainer = videoContainers[i].querySelector(".timeline-container")
-        const svgs = videoContainers[i].querySelectorAll("svg")
-        const notifiersContainer = videoContainers[i].querySelector(".notifiers-container")
+        const replayBtn = videoContainer.querySelector(".replay-btn") 
+        const playPauseBtn = videoContainer.querySelector(".play-pause-btn")
+        const theaterBtn = videoContainer.querySelector(".theater-btn")
+        const fullScreenBtn = videoContainer.querySelector(".full-screen-btn")
+        const pictureInPictureBtn = videoContainer.querySelector(".picture-in-picture-btn")
+        const miniPlayerExpandBtn = videoContainer.querySelector(".mini-player-expand-btn")
+        const miniPlayerCancelBtn = videoContainer.querySelector(".mini-player-cancel-btn")
+        const muteBtn = videoContainer.querySelector(".mute-btn")
+        const captionsBtn = videoContainer.querySelector(".captions-btn")
+        const speedBtn = videoContainer.querySelector(".speed-btn")
+        const currentTimeElem = videoContainer.querySelector(".current-time")
+        const totalTimeElem = videoContainer.querySelector(".total-time")
+        const previewImg = videoContainer.querySelector(".preview-img")
+        const thumbnailImg = videoContainer.querySelector(".thumbnail-img")
+        const volumeSlider = videoContainer.querySelector(".volume-slider")
+        const previewImgContainer = videoContainer.querySelector(".preview-img-container")
+        const timelineContainer = videoContainer.querySelector(".timeline-container")
+        const svgs = videoContainer.querySelectorAll("svg")
+        const notifiersContainer = videoContainer.querySelector(".notifiers-container")
 
 
         //resizing controls
         function controlsResize() {           
             let controlsSize = 25;
-            // controlsSize = getComputedStyle(videoContainers[i]).getPropertyValue("--controls-size")
+            // controlsSize = getComputedStyle(videoContainer).getPropertyValue("--controls-size")
             svgs.forEach(svg => {
                 svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
                 if(!svg.classList.contains("settings-icon"))
@@ -220,7 +279,7 @@ videos.forEach((video,i) => {
                         break
                 case "arrowup":
                     e.preventDefault()
-                    if(video.volume < 1) {video.volume += (video.volume*100)%10 ? (0.1 - video.volume%0.1) : 0.1}
+                    if(video.volume < 1) {video.volume += (video.volume*100)%5 ? (0.05 - video.volume%0.05) : 0.05}
                     fire("volumeup")
                     break
                 case "arrowdown":
@@ -229,12 +288,12 @@ videos.forEach((video,i) => {
                         fire("volumemuted")
                         break
                     }
-                    if((video.volume*100).toFixed() == 10) {
+                    if((video.volume*100).toFixed() == 5) {
                         fire("volumemuted")
                         video.volume = 0;
                         break
                     }
-                    if(video.volume) {video.volume -= ((video.volume*100).toFixed()%10) ? (video.volume%0.1) : 0.1}
+                    if(video.volume) {video.volume -= ((video.volume*100).toFixed()%5) ? (video.volume%0.05) : 0.05}
                     fire("volumedown")
             }
         }
@@ -248,10 +307,10 @@ videos.forEach((video,i) => {
         
         //Loading 
         video.addEventListener("waiting", () => {
-            videoContainers[i].classList.add("buffer")
+            videoContainer.classList.add("buffer")
         })
         video.addEventListener("playing", () => {
-            videoContainers[i].classList.remove("buffer")
+            videoContainer.classList.remove("buffer")
         })
         
         //Timeline
@@ -270,14 +329,14 @@ videos.forEach((video,i) => {
             const rect = timelineContainer.getBoundingClientRect()
             const percent = Math.min(Math.max(0, e.clientX - rect.x), rect.width) / rect.width
             isScrubbing = (e.buttons & 1) === 1
-            videoContainers[i].classList.toggle("scrubbing", isScrubbing)
+            videoContainer.classList.toggle("scrubbing", isScrubbing)
             if (isScrubbing) {
                 wasPaused = video.paused
                 video.pause()
             } else {
                 video.currentTime = percent * video.duration
                 if (!wasPaused) video.play()     
-                videoContainers[i].classList.remove("seeking");
+                videoContainer.classList.remove("seeking");
             }
         
             handleTimelineUpdate(e)
@@ -298,7 +357,7 @@ videos.forEach((video,i) => {
                 e.preventDefault()
                 thumbnailImg.src = previewImgSrc
                 timelineContainer.style.setProperty("--progress-position", percent)
-                videoContainers[i].classList.add("seeking");
+                videoContainer.classList.add("seeking");
             }
         
             const previewTime = parseInt(percent * video.duration) > 0 ? formatDuration(percent * video.duration) : ''
@@ -327,7 +386,7 @@ videos.forEach((video,i) => {
         function toggleCaptions() {
             const isHidden = captions.mode === "hidden"
             captions.mode = isHidden ? "showing" : "hidden"
-            videoContainers[i].classList.toggle("captions", isHidden)
+            videoContainer.classList.toggle("captions", isHidden)
         }
         
         //Duration
@@ -340,7 +399,7 @@ videos.forEach((video,i) => {
             const percent = video.currentTime / video.duration
             timelineContainer.style.setProperty("--progress-position", percent)
             if(video.currentTime < video.duration)
-                videoContainers[i].classList.remove("replay")
+                videoContainer.classList.remove("replay")
         })
         
         const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
@@ -390,18 +449,18 @@ videos.forEach((video,i) => {
             let volumePercent = `${((value-min) / (max - min)) * 100}%`
             volumeSlider.value = value
             volumeSlider.dataset.volume = `${value.toFixed()}`
-            videoContainers[i].querySelectorAll(".volume-up-notifier,.volume-down-notifier,.volume-muted-notifier").forEach((elem) => {
+            videoContainer.querySelectorAll(".volume-up-notifier,.volume-down-notifier,.volume-muted-notifier").forEach((elem) => {
                 elem.dataset.volume = `${value.toFixed()}%`
             })
             volumeSlider.style.setProperty("--volume-position", volumePosition)
             volumeSlider.style.setProperty("--volume-percent", volumePercent)
-            videoContainers[i].dataset.volumeLevel = volumeLevel
+            videoContainer.dataset.volumeLevel = volumeLevel
         }
         
         volumeState()
         
         video.addEventListener("ended", () => {
-            videoContainers[i].classList.add("replay")
+            videoContainer.classList.add("replay")
         })
         replayBtn.addEventListener("click", () => {
             video.currentTime = 0
@@ -409,13 +468,27 @@ videos.forEach((video,i) => {
                 video.play()
             else 
                 video.pause()
-            videoContainers[i].classList.remove("replay")
+            videoContainer.classList.remove("replay")
         })
         
         // View Modes
         theaterBtn.addEventListener("click", toggleTheaterMode)
         fullScreenBtn.addEventListener("click", toggleFullScreenMode)
         video.addEventListener("dblclick", toggleFullScreenMode)
+        if ((navigator.maxTouchPoints > 0) && (window.innerWidth < mobileThreshold)) {
+            video.removeEventListener("dblclick", toggleFullScreenMode)
+            video.addEventListener("dblclick", e => {
+                if ((e.clientX > (window.innerWidth * 0.65))) {
+                    skip(10)
+                    skipped = 10
+                    fire("fwd")
+                } else if (e.clientX < (window.innerWidth * 0.35)) {
+                    skip(-10)
+                    skipped = 10
+                    fire("bwd")
+                }
+            })
+        }
         pictureInPictureBtn.addEventListener("click", togglePictureInPictureMode)
         miniPlayerExpandBtn.addEventListener("click", () => {
             expandMiniPlayer()
@@ -433,21 +506,20 @@ videos.forEach((video,i) => {
             toggleMiniPlayerMode(false) 
         })
 
-        
         function toggleTheaterMode() {
-            videoContainers[i].classList.toggle("theater")
+            videoContainer.classList.toggle("theater")
         }
         
         function toggleFullScreenMode() {
             if (document.fullscreenElement == null) {
-                videoContainers[i].requestFullscreen()
+                videoContainer.requestFullscreen()
             } else {
                 document.exitFullscreen()
             }
         }
 
         function togglePictureInPictureMode() {
-            if(videoContainers[i].classList.contains("picture-in-picture")) {
+            if(videoContainer.classList.contains("picture-in-picture")) {
                 document.exitPictureInPicture()
             } else {
                 video.requestPictureInPicture()
@@ -459,7 +531,7 @@ videos.forEach((video,i) => {
         function toggleMiniPlayerMode(bool = true) {
         if(!document.fullscreenElement) {
             if (!bool) {
-                videoContainers[i].classList.remove("mini-player")
+                videoContainer.classList.remove("mini-player")
                 if(!video.paused && !concerned) {
                     video.pause() 
                 }
@@ -468,10 +540,10 @@ videos.forEach((video,i) => {
                 return
             }
             if (!video.paused && window.innerWidth > mobileThreshold && !document.pictureInPictureElement && !intersect) {
-                videoContainers[i].classList.add("mini-player")
+                videoContainer.classList.add("mini-player")
             } 
-            if ((videoContainers[i].classList.contains("mini-player") && intersect) || (videoContainers[i].classList.contains("mini-player") && window.innerWidth < mobileThreshold)) {
-                videoContainers[i].classList.remove("mini-player")
+            if ((videoContainer.classList.contains("mini-player") && intersect) || (videoContainer.classList.contains("mini-player") && window.innerWidth < mobileThreshold)) {
+                videoContainer.classList.remove("mini-player")
                 if(!video.paused) {video.pause()}
             }
             volumeState()
@@ -479,7 +551,6 @@ videos.forEach((video,i) => {
         }
         
         //Intersection Observer Setup to watch the video
-        const mobileThreshold = 600
         let intersect = false;
         let videoOptions = {
             root: null,
@@ -505,67 +576,76 @@ videos.forEach((video,i) => {
                 }
         })
         }, videoOptions)
-        videoObserver.observe(videoContainers[i].parentElement)
+        videoObserver.observe(videoContainer.parentElement)
         videoObserver.observe(video)
 
         
         document.addEventListener("fullscreenchange", ()=> {
-            videoContainers[i].classList.toggle("full-screen", document.fullscreenElement)            
-            if(videoContainers[i].classList.contains("mini-player") && videoContainers[i].classList.contains("full-screen")) {
-                videoContainers[i].classList.remove("mini-player")
+            videoContainer.classList.toggle("full-screen", document.fullscreenElement)            
+            if(videoContainer.classList.contains("mini-player") && videoContainer.classList.contains("full-screen")) {
+                videoContainer.classList.remove("mini-player")
             }
         })
         document.addEventListener("webkitfullscreenchange", ()=> {
-            videoContainers[i].classList.toggle("full-screen", document.fullscreenElement)
-            if(videoContainers[i].classList.contains("mini-player") && videoContainers[i].classList.contains("full-screen")) {
-                videoContainers[i].classList.remove("mini-player")
+            videoContainer.classList.toggle("full-screen", document.fullscreenElement)
+            if(videoContainer.classList.contains("mini-player") && videoContainer.classList.contains("full-screen")) {
+                videoContainer.classList.remove("mini-player")
             }
         })
 
         window.addEventListener('resize', () => {
             toggleMiniPlayerMode()
+            playbtnPosition()
         })
+        
+        //for the mobile play btn since the video height is not fixed value
+        const playbtnPosition = () => {
+            if (window.innerWidth < mobileThreshold) {
+                playPauseBtn.style.setProperty("--mobile-btn-position", `${(video.offsetHeight/2) - 25}px`)
+            }   
+        }
+        playbtnPosition()
 
         video.addEventListener("enterpictureinpicture", () => {
-            videoContainers[i].classList.add("picture-in-picture")
+            videoContainer.classList.add("picture-in-picture")
             toggleMiniPlayerMode(false)
         })
         
         video.addEventListener("leavepictureinpicture", () => {
-            videoContainers[i].classList.remove("picture-in-picture")
+            videoContainer.classList.remove("picture-in-picture")
             toggleMiniPlayerMode()
         })
         
         // Play/Pause
         playPauseBtn.addEventListener("click", togglePlay)
-        video.addEventListener("click", togglePlay)
+        if (window.innerWidth > mobileThreshold) {video.addEventListener("click", togglePlay)}
         
         function togglePlay() {
             video.paused ? video.play() : video.pause()
         }
         
         video.addEventListener("play", ()=> {
-            videoContainers[i].classList.remove("paused")
+            videoContainer.classList.remove("paused")
             fire("videoplay")
         })
         
         video.addEventListener("pause", ()=> {
-            videoContainers[i].classList.add("paused")
+            videoContainer.classList.add("paused")
             fire("videopause")
         })        
 
         if('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: "Justice League Preview",
+                title: "Zack Snyder's Justice League Teaser",
                 artwork: [
-                    {src: '/assets/justice-league.jpg'}
+                    {src: 'assets/justice-league-b-s.jpeg'}
                 ]
             })
 
             navigator.mediaSession.setActionHandler('play', ()=>{video.play()})
             navigator.mediaSession.setActionHandler('pause', ()=>{video.pause()})
             navigator.mediaSession.setActionHandler('seekbackward', ()=>{skip(-30)})
-            navigator.mediaSession.setActionHandler('seekforward', ()=>{video.skip(30)})
+            navigator.mediaSession.setActionHandler('seekforward', ()=>{skip(30)})
         }
         
         //custom event function for notifier events
@@ -575,6 +655,13 @@ videos.forEach((video,i) => {
             })
             el.dispatchEvent(evt)
         }
+        const otherFire = (eventName, el = notifiersContainer, detail=null, bubbles=true, cancellable=true) => {
+            let evt = new CustomEvent(eventName, {
+                detail, bubbles, cancellable
+            })
+            el.dispatchEvent(evt)
+        }
+
         //event listeners for notifiers
         notifiersContainer.addEventListener("videopause", () => {
             notifiersContainer.dataset.currentNotifier = "videopause"
@@ -613,8 +700,8 @@ videos.forEach((video,i) => {
         const emptyDataset = () => {
             setTimeout(()=>{notifiersContainer.dataset.currentNotifier = ''}, notifierDelay)
         }
-    // } else {
-    //     return
-    // }
+    } else {
+        return
+    }
 })
 

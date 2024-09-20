@@ -51,12 +51,12 @@ body {
 }
 
 .video-container svg path{
-    fill: #ffffff!important;
+    fill: #ffffff;
 }
 
 .video-container svg {
-    width: var(--controls-size)!important;
-    height: var(--controls-size)!important;
+    width: var(--controls-size);
+    height: var(--controls-size);
 }
 
 .replay-btn {
@@ -135,6 +135,7 @@ body {
     width: initial;
     height: initial;
     background: none;
+    border-radius: 0;
 }
 
 .video-container.buffer.mini-player .play-pause-btn svg {
@@ -152,7 +153,6 @@ body {
     width: calc(var(--controls-size)*2.5);
     height: calc(var(--controls-size)*2.5);
     border-radius: 50%;
-    z-index: -1;
 }
 
 .video-container.mini-player .play-notifier, .video-container.mini-player .pause-notifier, .video-container.mini-player.replay .play-pause-btn, .video-container.replay .pause-notifier {
@@ -729,7 +729,7 @@ video::-webkit-media-text-track-container {
 } 
 
 
-@media(max-width: 600px) {
+@media(max-width: 500px) {
     .video-container, .video-container.full-screen, .notifiers {
         --controls-size: 22px;
     }
@@ -758,5 +758,40 @@ video::-webkit-media-text-track-container {
     .duration-container {
         font-size: calc(var(--controls-size)/1.75);
     }
+    .video-container.replay .replay-btn {
+        width: calc(var(--controls-size)*3);
+        height: calc(var(--controls-size)*3);
+    }
+    .replay-btn svg {
+        transform: scale(2.5);        
+    }
+    .video-container .play-pause-btn {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        bottom: var(--mobile-btn-position);
+        left: calc(50% - calc(var(--controls-size)*1.25));
+        background: var(--controls-background)!important;
+        width: calc(var(--controls-size)*2.5)!important;
+        height: calc(var(--controls-size)*2.5)!important;
+        border-radius: 50%;
+    } 
+    .play-pause-btn svg {
+        transform: scale(2)!important;
+    }
+    .video-container.buffer .play-pause-btn {
+        position: static;
+        width: initial!important;
+        height: initial!important;
+        background: none!important;
+        border-radius: 0!important;
+    }
+    .video-container.buffer .play-pause-btn svg {
+        transform: scale(1)!important;
+    }
+    .video-container .play-notifier, .video-container .pause-notifier, .video-container.replay .play-pause-btn {
+        display: none!important;
+    }       
 }
 
