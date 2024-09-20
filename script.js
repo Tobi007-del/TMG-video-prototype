@@ -193,6 +193,9 @@ videos.forEach((video,i) => {
                     if(video.muted) fire("volumemuted") 
                     else fire("volumeup")
                     break
+                case "s": 
+                    changePlaybackSpeed()
+                    break
                 case "c":
                     toggleCaptions()
                     break
@@ -454,6 +457,7 @@ videos.forEach((video,i) => {
         //a variable to check if the user is concerned in the current video while in mini-player mode
         let concerned = false
         function toggleMiniPlayerMode(bool = true) {
+        if(!document.fullscreenElement) {
             if (!bool) {
                 videoContainers[i].classList.remove("mini-player")
                 if(!video.paused && !concerned) {
@@ -471,6 +475,7 @@ videos.forEach((video,i) => {
                 if(!video.paused) {video.pause()}
             }
             volumeState()
+        }
         }
         
         //Intersection Observer Setup to watch the video
