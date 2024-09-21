@@ -1,6 +1,6 @@
 
 const videos = document.querySelectorAll("video")
-const mobileThreshold = 500
+const mobileThreshold = 600
 
 videos.forEach((video,i) => {
     if (video.dataset.controls === "tmg-controls") {
@@ -69,7 +69,7 @@ videos.forEach((video,i) => {
             </svg> 
         </button>
         <div class="video-controls-container">
-            <div class="timeline-container">
+            <div class="timeline-container" title="'>' - 5s & Shift + '>' - 10s">
                 <div class="timeline">
                     <div class="preview-img-container"><img class="preview-img" alt="Preview-image"></div>
                     <div class="thumb-indicator"></div>
@@ -96,7 +96,7 @@ videos.forEach((video,i) => {
                             <path fill="currentColor" d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
                         </svg>
                     </button>
-                    <input class="volume-slider" type="range" min="0" max="100" step="any" title="Adjust Volume">
+                    <input class="volume-slider" type="range" min="0" max="100" step="any" title="Adjust Volume - Vertical arrows">
                 </div>
                 <div class="duration-container">
                     <div class="current-time">0.00</div>
@@ -126,7 +126,7 @@ videos.forEach((video,i) => {
                         <path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z"/>
                     </svg>
                 </button>
-                <button class="full-screen-btn" title="ToggleFull Screen(f)">
+                <button class="full-screen-btn" title="Toggle Full Screen(f)">
                     <svg class="open" data-tooltip-text="Enter Full Screen(f)" data-tooltip-position="top">
                         <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
                     </svg>
@@ -474,25 +474,43 @@ videos.forEach((video,i) => {
         // View Modes
         theaterBtn.addEventListener("click", toggleTheaterMode)
         fullScreenBtn.addEventListener("click", toggleFullScreenMode)
-        video.addEventListener("dblclick", toggleFullScreenMode)
-        if ((navigator.maxTouchPoints > 0) && (window.innerWidth < mobileThreshold)) {
-            video.removeEventListener("dblclick", toggleFullScreenMode)
-            video.addEventListener("dblclick", e => {
-                if ((e.clientX > (window.innerWidth * 0.65))) {
-                    skip(10)
-                    skipped = 10
-                    fire("fwd")
-                } else if (e.clientX < (window.innerWidth * 0.35)) {
-                    skip(-10)
-                    skipped = 10
-                    fire("bwd")
-                }
-            })
-        }
         pictureInPictureBtn.addEventListener("click", togglePictureInPictureMode)
         miniPlayerExpandBtn.addEventListener("click", () => {
             expandMiniPlayer()
         })
+        const doubletapToSkip = (e) => {
+            if ((e.clientX > (window.innerWidth * 0.65))) {
+                skip(10)
+                skipped = 10
+                fire("fwd")
+            } else if (e.clientX < (window.innerWidth * 0.35)) {
+                skip(-10)
+                skipped = 10
+                fire("bwd")
+            }
+        }
+
+        const tapHandler = () => {
+        video.removeEventListener("click", togglePlay)
+        if ((navigator.maxTouchPoints > 0) && (window.innerWidth < (mobileThreshold+300))) {
+            video.removeEventListener("dblclick", toggleFullScreenMode)
+            video.addEventListener("dblclick", e => {
+                doubletapToSkip(e)
+            })
+        } else {
+            video.removeEventListener("dblclick", doubletapToSkip)
+            video.addEventListener("dblclick", toggleFullScreenMode)
+        }
+        video.addEventListener("click", e => {
+            if ((e.clientX > (window.innerWidth*0.35)) && (e.clientX <(window.innerWidth*0.75))) {
+                togglePlay()
+            } else if(window.innerWidth > (mobileThreshold+300)) {
+                togglePlay()
+            }
+        })
+        }
+        tapHandler()   
+
         function expandMiniPlayer() {
             concerned = true
             toggleMiniPlayerMode(false)
@@ -596,15 +614,21 @@ videos.forEach((video,i) => {
         window.addEventListener('resize', () => {
             toggleMiniPlayerMode()
             playbtnPosition()
+            tapHandler()
         })
         
-        //for the mobile play btn since the video height is not fixed value
+        //For the mobile play btn since the video height is not fixed value
         const playbtnPosition = () => {
             if (window.innerWidth < mobileThreshold) {
-                playPauseBtn.style.setProperty("--mobile-btn-position", `${(video.offsetHeight/2) - 25}px`)
+                let btnOffset = (videoContainer.offsetHeight/2) - 25
+                if (btnOffset < 50) {
+                    btnOffset = 100
+                }
+                playPauseBtn.style.setProperty("--mobile-btn-position", `${btnOffset}px`)
             }   
         }
         playbtnPosition()
+
 
         video.addEventListener("enterpictureinpicture", () => {
             videoContainer.classList.add("picture-in-picture")
@@ -618,7 +642,7 @@ videos.forEach((video,i) => {
         
         // Play/Pause
         playPauseBtn.addEventListener("click", togglePlay)
-        if (window.innerWidth > mobileThreshold) {video.addEventListener("click", togglePlay)}
+
         
         function togglePlay() {
             video.paused ? video.play() : video.pause()

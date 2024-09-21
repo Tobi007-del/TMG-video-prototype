@@ -89,7 +89,7 @@ body {
     border-radius: calc(var(--controls-size)/1.5)!important;
     transform: translateX(100%);
     opacity: 0;
-    animation: tmp .25s ease forwards;
+    animation: tmp .25s ease forwards;  
 }
 @keyframes tmp {
     to {
@@ -136,6 +136,7 @@ body {
     height: initial;
     background: none;
     border-radius: 0;
+    z-index: 1;
 }
 
 .video-container.buffer.mini-player .play-pause-btn svg {
@@ -153,6 +154,7 @@ body {
     width: calc(var(--controls-size)*2.5);
     height: calc(var(--controls-size)*2.5);
     border-radius: 50%;
+    z-index: -1;
 }
 
 .video-container.mini-player .play-notifier, .video-container.mini-player .pause-notifier, .video-container.mini-player.replay .play-pause-btn, .video-container.replay .pause-notifier {
@@ -297,7 +299,7 @@ video {
 
 .video-controls-container .controls {
     display: flex;
-    gap: calc(var(--controls-size)/2);
+    gap: calc(var(--controls-size)/1.5);
     margin-inline: calc(var(--controls-size)/1.75);
     padding: calc(var(--controls-size)/2.5) calc(var(--controls-size)/5);
     align-items: center;
@@ -458,7 +460,7 @@ input[type="range"]::-webkit-slider-thumb {
     gap: calc(var(--controls-size)/5);
     flex-grow: 1;
     color: white;
-    font-size: calc(var(--controls-size)/1.5);
+    font-size: calc(var(--controls-size)/1.75);
 }
 
 .captions-btn {
@@ -729,9 +731,9 @@ video::-webkit-media-text-track-container {
 } 
 
 
-@media(max-width: 500px) {
+@media(max-width: 600px) {
     .video-container, .video-container.full-screen, .notifiers {
-        --controls-size: 22px;
+        --controls-size: 22.5px;
     }
     .theater-btn {
         display: none!important;
@@ -745,16 +747,6 @@ video::-webkit-media-text-track-container {
         gap: calc(var(--controls-size)/2);
         margin-inline: calc(var(--controls-size)/2.5);
     }
-    .volume-container {
-        gap: calc(var(--controls-size)/7.5);
-    }
-    .volume-slider {
-        max-width: calc(var(--controls-size)*1.5);
-    }
-    .volume-container:hover .volume-slider,
-    .volume-slider:focus-within {
-        width: calc(var(--controls-size)*1.5);
-    }
     .duration-container {
         font-size: calc(var(--controls-size)/1.75);
     }
@@ -766,6 +758,7 @@ video::-webkit-media-text-track-container {
         transform: scale(2.5);        
     }
     .video-container .play-pause-btn {
+        --mobile-btn-position: 100px;
         position: absolute;
         display: flex;
         justify-content: center;
@@ -776,6 +769,7 @@ video::-webkit-media-text-track-container {
         width: calc(var(--controls-size)*2.5)!important;
         height: calc(var(--controls-size)*2.5)!important;
         border-radius: 50%;
+        z-index: -1;
     } 
     .play-pause-btn svg {
         transform: scale(2)!important;
@@ -786,6 +780,7 @@ video::-webkit-media-text-track-container {
         height: initial!important;
         background: none!important;
         border-radius: 0!important;
+        z-index: 1!important;
     }
     .video-container.buffer .play-pause-btn svg {
         transform: scale(1)!important;
