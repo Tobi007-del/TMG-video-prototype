@@ -478,12 +478,13 @@ videos.forEach((video,i) => {
         miniPlayerExpandBtn.addEventListener("click", () => {
             expandMiniPlayer()
         })
-        const doubletapToSkip = (e) => {
-            if ((e.clientX > (window.innerWidth * 0.65))) {
+        const doubletapToSkip = e => {
+            const rect = video.getBoundingClientRect()
+            if (((e.clientX-rect.left) > (video.offsetWidth*0.65))) {
                 skip(10)
                 skipped = 10
                 fire("fwd")
-            } else if (e.clientX < (window.innerWidth * 0.35)) {
+            } else if ((e.clientX-rect.left) < (video.offsetWidth*0.35)) {
                 skip(-10)
                 skipped = 10
                 fire("bwd")
@@ -491,23 +492,13 @@ videos.forEach((video,i) => {
         }
 
         const tapHandler = () => {
-        video.removeEventListener("click", togglePlay)
         if ((navigator.maxTouchPoints > 0) && (window.innerWidth < (mobileThreshold+300))) {
             video.removeEventListener("dblclick", toggleFullScreenMode)
-            video.addEventListener("dblclick", e => {
-                doubletapToSkip(e)
-            })
+            video.addEventListener("dblclick", doubletapToSkip)
         } else {
             video.removeEventListener("dblclick", doubletapToSkip)
             video.addEventListener("dblclick", toggleFullScreenMode)
         }
-        video.addEventListener("click", e => {
-            if ((e.clientX > (window.innerWidth*0.35)) && (e.clientX <(window.innerWidth*0.75))) {
-                togglePlay()
-            } else if(window.innerWidth > (mobileThreshold+300)) {
-                togglePlay()
-            }
-        })
         }
         tapHandler()   
 
@@ -642,7 +633,14 @@ videos.forEach((video,i) => {
         
         // Play/Pause
         playPauseBtn.addEventListener("click", togglePlay)
-
+        video.addEventListener("click", e => {
+            const rect = video.getBoundingClientRect()
+            if (((e.clientX-rect.left) > (video.offsetWidth*0.35)) && ((e.clientX-rect.left) < (video.offsetWidth*0.75))) {
+                togglePlay()
+            } else if(window.innerWidth > (mobileThreshold+300)) {
+                togglePlay()
+            }
+        })
         
         function togglePlay() {
             video.paused ? video.play() : video.pause()
