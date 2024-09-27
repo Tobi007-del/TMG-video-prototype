@@ -47,6 +47,7 @@ body {
     background-color: black;
     border-radius: calc(var(--controls-size)/1.5);
     overflow: hidden;
+    touch-action: none;
     margin: 50px auto 50px auto;
 }
 
@@ -292,9 +293,26 @@ video {
     pointer-events: none;
 }
 
-.video-container:hover .video-controls-container, .video-container.mini-player:hover .mini-player-expand-btn-wrapper, .video-container.mini-player:hover .mini-player-cancel-btn-wrapper, .video-container:focus-within .video-controls-container, .video-container.mini-player:focus-within .mini-player-expand-btn-wrapper, .video-container.mini-player:focus-within .mini-player-cancel-btn-wrapper, .video-container.paused .video-controls-container, .video-container.mini-player.paused .mini-player-expand-btn-wrapper, .video-container.mini-player.paused .mini-player-cancel-btn-wrapper,
+/* .video-container:hover .video-controls-container, .video-container.mini-player:hover .mini-player-expand-btn-wrapper, .video-container.mini-player:hover .mini-player-cancel-btn-wrapper,  */
+.video-container:focus-within .video-controls-container, .video-container.mini-player:focus-within .mini-player-expand-btn-wrapper, .video-container.mini-player:focus-within .mini-player-cancel-btn-wrapper, .video-container.paused .video-controls-container, .video-container.mini-player.paused .mini-player-expand-btn-wrapper, .video-container.mini-player.paused .mini-player-cancel-btn-wrapper,
 .video-container.picture-in-picture .video-controls-container {
     opacity: 1;
+}
+
+.video-container .video-controls-container.hover, .video-container.mini-player .mini-player-expand-btn-wrapper.hover, .video-container.mini-player .mini-player-cancel-btn-wrapper.hover {
+    animation: opaque 7.5s ease;
+}
+
+@keyframes opaque {
+    2.5% {
+        opacity: 1;
+    }
+    97.5% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .video-controls-container .controls {
@@ -751,11 +769,11 @@ video::-webkit-media-text-track-container {
         font-size: calc(var(--controls-size)/1.75);
     }
     .video-container.replay .replay-btn {
-        width: calc(var(--controls-size)*3);
-        height: calc(var(--controls-size)*3);
+        width: calc(var(--controls-size)*2.5);
+        height: calc(var(--controls-size)*2.5);
     }
     .replay-btn svg {
-        transform: scale(2.5);        
+        transform: scale(1.85);        
     }
     .video-container .play-pause-btn {
         --mobile-btn-position: 100px;

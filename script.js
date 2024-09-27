@@ -5,7 +5,7 @@ const mobileThreshold = 600
 videos.forEach((video,i) => {
     if (video.dataset.controls === "tmg-controls") {
         const videoContainer = document.createElement('div')
-        videoContainer.classList = "video-container paused theater"
+        videoContainer.classList = "video-container paused"
         videoContainer.innerHTML = `<img class="thumbnail-img" alt="movie-image">
         <div class="notifiers-container" data-current-notifier="">
             <div class="notifiers play-notifier">
@@ -315,20 +315,31 @@ videos.forEach((video,i) => {
         
         //Timeline
         timelineContainer.addEventListener("mousemove", handleTimelineUpdate)
-        timelineContainer.addEventListener("mousedown", toggleScrubbing)
-        document.addEventListener("mouseup", e => {
-            if (isScrubbing) toggleScrubbing(e)
-        })
-        document.addEventListener("mousemove", e => {
-            if (isScrubbing) handleTimelineUpdate(e)
-        })
+        // timelineContainer.addEventListener("mousedown", toggleScrubbing)
+        // document.addEventListener("mouseup", e => {
+        //     if (isScrubbing) toggleScrubbing(e)
+        // })
+        // document.addEventListener("mousemove", e => {
+        //     if (isScrubbing) handleTimelineUpdate(e)
+        // })
         
+        timelineContainer.addEventListener('pointerdown', e => {
+            timelineContainer.setPointerCapture(e.pointerId)
+            isScrubbing = true
+            toggleScrubbing(e)
+            timelineContainer.addEventListener("pointermove", handleTimelineUpdate)
+            timelineContainer.addEventListener("pointerup", (e) => {
+                isScrubbing = false
+                toggleScrubbing(e)
+                timelineContainer.removeEventListener("pointermove",handleTimelineUpdate)
+            },{once:true})
+        })
         
         let isScrubbing = false
         function toggleScrubbing(e) {
             const rect = timelineContainer.getBoundingClientRect()
             const percent = Math.min(Math.max(0, e.clientX - rect.x), rect.width) / rect.width
-            isScrubbing = (e.buttons & 1) === 1
+            // isScrubbing = e.buttons & 1
             videoContainer.classList.toggle("scrubbing", isScrubbing)
             if (isScrubbing) {
                 wasPaused = video.paused
@@ -354,7 +365,6 @@ videos.forEach((video,i) => {
             timelineContainer.style.setProperty("--preview-img-position", previewImgPercent)
         
             if(isScrubbing) {
-                e.preventDefault()
                 thumbnailImg.src = previewImgSrc
                 timelineContainer.style.setProperty("--progress-position", percent)
                 videoContainer.classList.add("seeking");
@@ -464,10 +474,7 @@ videos.forEach((video,i) => {
         })
         replayBtn.addEventListener("click", () => {
             video.currentTime = 0
-            if(video.autoplay == true) 
-                video.play()
-            else 
-                video.pause()
+            video.play()
             videoContainer.classList.remove("replay")
         })
         
@@ -588,6 +595,14 @@ videos.forEach((video,i) => {
         videoObserver.observe(videoContainer.parentElement)
         videoObserver.observe(video)
 
+        videoContainer.addEventListener("mouseover", () => {
+            const opaqueElements = document.querySelectorAll(".video-container .video-controls-container, .video-container.mini-player .mini-player-expand-btn-wrapper, .video-container.mini-player .mini-player-cancel-btn-wrapper")
+            const timeout = 10000
+            opaqueElements.forEach(opaqueElement => {opaqueElement.classList.add("hover")})
+            setTimeout(() => {
+                opaqueElements.forEach(opaqueElement => {opaqueElement.classList.remove("hover")})
+            },timeout)
+        })
         
         document.addEventListener("fullscreenchange", ()=> {
             videoContainer.classList.toggle("full-screen", document.fullscreenElement)            
