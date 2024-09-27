@@ -594,15 +594,6 @@ videos.forEach((video,i) => {
         }, videoOptions)
         videoObserver.observe(videoContainer.parentElement)
         videoObserver.observe(video)
-
-        videoContainer.addEventListener("mouseover", () => {
-            const opaqueElements = document.querySelectorAll(".video-container .video-controls-container, .video-container.mini-player .mini-player-expand-btn-wrapper, .video-container.mini-player .mini-player-cancel-btn-wrapper")
-            const timeout = 10000
-            opaqueElements.forEach(opaqueElement => {opaqueElement.classList.add("hover")})
-            setTimeout(() => {
-                opaqueElements.forEach(opaqueElement => {opaqueElement.classList.remove("hover")})
-            },timeout)
-        })
         
         document.addEventListener("fullscreenchange", ()=> {
             videoContainer.classList.toggle("full-screen", document.fullscreenElement)            
