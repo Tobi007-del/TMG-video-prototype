@@ -683,12 +683,6 @@ videos.forEach((video,i) => {
             })
             el.dispatchEvent(evt)
         }
-        const otherFire = (eventName, el = notifiersContainer, detail=null, bubbles=true, cancellable=true) => {
-            let evt = new CustomEvent(eventName, {
-                detail, bubbles, cancellable
-            })
-            el.dispatchEvent(evt)
-        }
 
         //event listeners for notifiers
         notifiersContainer.addEventListener("videopause", () => {
