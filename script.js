@@ -528,8 +528,18 @@ videos.forEach((video,i) => {
         
         function toggleFullScreenMode() {
             if (document.fullscreenElement == null) {
+                if (screen.orientation && screen.orientation.lock && screen.orientation.type.startsWith("portrait")) {  
+                    screen.orientation.lock('landscape').then(() => {  
+                        console.log('Video was changed to fullscreen so orientation was locked to landscape.');  
+                    }).catch(function(error) {  
+                        console.error('Failed to lock orientation:', error);  
+                    });  
+                }  
                 videoContainer.requestFullscreen()
             } else {
+                if (screen.orientation && screen.orientation.lock && screen.orientation.type.startsWith('portrait')) {  
+                    screen.orientation.unlock()
+                }
                 document.exitFullscreen()
             }
         }
@@ -600,6 +610,7 @@ videos.forEach((video,i) => {
             if(videoContainer.classList.contains("mini-player") && videoContainer.classList.contains("full-screen")) {
                 videoContainer.classList.remove("mini-player")
             }
+            playbtnPosition()
         })
         document.addEventListener("webkitfullscreenchange", ()=> {
             videoContainer.classList.toggle("full-screen", document.fullscreenElement)
@@ -616,7 +627,7 @@ videos.forEach((video,i) => {
         
         //For the mobile play btn since the video height is not fixed value
         const playbtnPosition = () => {
-            if (window.innerWidth < mobileThreshold) {
+            if (window.innerWidth <= mobileThreshold) {
                 let btnOffset = (videoContainer.offsetHeight/2) - 25
                 if (btnOffset < 50) {
                     btnOffset = 100

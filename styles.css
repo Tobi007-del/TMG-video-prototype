@@ -48,7 +48,6 @@ body {
     background-color: black;
     border-radius: calc(var(--controls-size)/1.5);
     overflow: hidden;
-    touch-action: none;
     margin: 50px auto 50px auto;
 }
 
@@ -524,6 +523,7 @@ video::-webkit-media-text-track-container {
     cursor: grab;
     display: flex;
     align-items: center;
+    touch-action: none;
 }
 
 .video-container.seeking .timeline-container {
