@@ -447,6 +447,7 @@ videos.forEach((video,i) => {
         function volumeState() {
             let { min, max, value, offsetWidth } = volumeSlider
             value = video.volume * 100
+            let volumeLevel = ""
             if(video.muted || value === 0) {
                 value = 0;
                 volumeLevel = "muted"
