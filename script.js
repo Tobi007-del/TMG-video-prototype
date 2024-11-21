@@ -1,4 +1,3 @@
-
 const videos = document.querySelectorAll("video")
 const mobileThreshold = 600
 
@@ -140,7 +139,6 @@ videos.forEach((video,i) => {
         parentDiv.insertBefore(videoContainer, video)
         videoContainer.append(video)
 
-        const videoContainers = document.querySelectorAll(".video-container")
         const replayBtn = videoContainer.querySelector(".replay-btn") 
         const playPauseBtn = videoContainer.querySelector(".play-pause-btn")
         const theaterBtn = videoContainer.querySelector(".theater-btn")
