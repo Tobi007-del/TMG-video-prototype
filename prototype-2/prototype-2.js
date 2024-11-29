@@ -392,7 +392,7 @@ videos.forEach(video => {
             const previewImgMin = (previewImg.offsetWidth / 2) / rect.width
             const previewImgPercent = Math.min(Math.max(percent, previewImgMin),(1 - previewImgMin))
             const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10))
-            const previewImgSrc = `assets/previewImgs/preview${previewImgNumber}.jpg`
+            const previewImgSrc = `../assets/previewImgs/preview${previewImgNumber}.jpg`
             const previewTime = parseInt(percent * video.duration) > 0 ? formatDuration(percent * video.duration) : ''
             previewImg.src = previewImgSrc
             timelineContainer.style.setProperty("--preview-position", percent)
