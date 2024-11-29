@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TMG Video Prototype</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
 </head>
 <style>
     :root {
@@ -22,6 +20,8 @@
     body {
         width: 100dvw;
         height: 100dvh;
+        margin: 0;
+        padding: 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -88,17 +88,17 @@
             background-position: -200% center;
         }
     }
-    body > div:last-of-type {
+    .last-section {
         flex-grow: 1;
         display: flex;
         align-items: center;
         width: 100%;
     }
-    body > div:last-of-type > div {
+    .last-section > div {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
-        padding-inline: 1rem;
+        padding-inline: 2rem;
         row-gap: 1rem;
         column-gap: 2rem;
         width: 100%;
@@ -121,7 +121,7 @@
     }
 </style>
 <body>
-    <div>
+    <div class="first-section">
         <h2>These are the current protoypes for 
         <span class="magic">
             <span class="magic-star">
@@ -142,7 +142,7 @@
         </span>
          Video Player</h2>
     </div>
-    <div>
+    <div class="last-section">
         <div>
             <a title="View Prototype 1" href="prototype-1.html" class="prototype-link">View 1st Prototype</a>
             <a title="View Prototype 2" href="prototype-2.html" class="prototype-link">View 2nd Prototype</a>
