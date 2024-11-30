@@ -359,6 +359,10 @@ video {
     margin-inline: unset!important;
 }
 
+.video-container.movement .thumb-indicator {
+    --scale: 0!important;
+}
+
 .video-controls-container .controls {
     display: flex;
     gap: calc(var(--controls-size)/1.5);
