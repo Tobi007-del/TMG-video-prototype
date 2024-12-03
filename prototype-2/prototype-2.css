@@ -46,6 +46,7 @@ body {
 
 .container {
     position: relative;
+    padding-top: 50px;
 }
 
 .video-container {
@@ -62,7 +63,6 @@ body {
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
-    margin: 50px auto 50px auto;
 }
 
 .video-container svg path{
