@@ -263,7 +263,7 @@ videos.forEach(video => {
          
         function handleTimelineUpdate(e) { 
             const rect = timelineContainer.getBoundingClientRect()
-            const percent = (e.clientX - rect.x) / rect.width
+            const percent = clamp(e.clientX - rect.x, 0, rect.width) / rect.width
             const previewImgMin = (previewImg.offsetWidth / 2) / rect.width
             const previewImgPercent = clamp(previewImgMin, percent, (1 - previewImgMin))
             const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10))

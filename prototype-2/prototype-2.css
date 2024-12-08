@@ -1107,14 +1107,14 @@ video::-webkit-media-text-track-container {
     .video-container.paused .thumb-indicator, 
     .video-container.picture-in-picture .thumb-indicator, 
     .video-container.scrubbing .thumb-indicator, 
-    .timeline-container:hover .thumb-indicator {
+    .video-container.hover .timeline-container:hover .thumb-indicator {
         --scale: 1.2;
     } 
     .video-container .preview-img-container {
         --controls-size: 17px;
         height: calc(var(--controls-size)*1.25);
         border: none;
-        border-radius: 2.5px;
+        border-radius: 2.5px!important;
     }
     .video-container .preview-img-container::after {
         align-items: center;
