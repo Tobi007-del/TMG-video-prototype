@@ -1,11 +1,13 @@
 const videos = document.querySelectorAll("video")
 const mobileThreshold = 480
-function clamp(min, amount, max) {return Math.min(Math.max(amount, min), max)}
+function clamp(min, amount, max) {
+    return Math.min(Math.max(amount, min), max)
+}
 
 videos.forEach(video => {
-    if (video.dataset.controls === "tmg-controls") {
+    if (video.dataset.controls === "tastey-video-controls") {
         const videoContainer = document.createElement('div')
-        videoContainer.classList = "video-container"
+        videoContainer.classList = "video-container theater"
         videoContainer.innerHTML = 
         `
         <img class="thumbnail-img" alt="movie-image">
@@ -25,7 +27,9 @@ videos.forEach(video => {
                     <path fill="currentColor" d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
                 </svg>
             </div>
-            <div class="notifiers speed-notifier"></div>
+            <div class="notifiers speed-notifier">
+                <p></p>
+            </div>
             <div class="notifiers theatre-notifier">
                 <svg class="tall" data-tooltip-text="Theater Mode(t)" data-tooltip-position="top">
                     <path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"/>
@@ -42,7 +46,11 @@ videos.forEach(video => {
                     <path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
                 </svg>
             </div>            
-            <div class="notifiers volume-notifier-content"></div>
+            <div class="notifiers volume-down-notifier">
+                <svg class="volume-down-notifier-icon">
+                    <path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+                </svg>
+            </div>
             <div class="notifiers volume-up-notifier">
                 <svg class="volume-up-notifier-icon" >
                     <path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
@@ -59,26 +67,14 @@ videos.forEach(video => {
                 </svg>
             </div>
             <div class="notifiers fwd-notifier">
-                <svg data-tooltip-text="Play(k)" data-tooltip-position="top">
-                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                <svg viewBox="0 -960 960 960" class="fwd-notifier-icon">
+                    <path d="M100-240v-480l360 240-360 240Zm400 0v-480l360 240-360 240ZM180-480Zm400 0Zm-400 90 136-90-136-90v180Zm400 0 136-90-136-90v180Z"/>
                 </svg>
-                <svg data-tooltip-text="Play(k)" data-tooltip-position="top">
-                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-                </svg>
-                <svg data-tooltip-text="Play(k)" data-tooltip-position="top">
-                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-                </svg>                
             </div>
             <div class="notifiers bwd-notifier">
-                <svg data-tooltip-text="Play(k)" data-tooltip-position="top">
-                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                <svg viewBox="0 -960 960 960" class="bwd-notifier-icon">
+                    <path d="M860-240 500-480l360-240v480Zm-400 0L100-480l360-240v480Zm-80-240Zm400 0Zm-400 90v-180l-136 90 136 90Zm400 0v-180l-136 90 136 90Z"/>
                 </svg>
-                <svg data-tooltip-text="Play(k)" data-tooltip-position="top">
-                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-                </svg>
-                <svg data-tooltip-text="Play(k)" data-tooltip-position="top">
-                    <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-                </svg>                
             </div>
         </div>
         <div class="mini-player-expand-btn-wrapper">
@@ -202,17 +198,16 @@ videos.forEach(video => {
         videoContainer.querySelector(".video-controls-container").style.opacity = 0
         const playNotifier = videoContainer.querySelector(".play-notifier")
         playNotifier.style.animation = "beat 1s infinite ease-out"
-
-        //some general variables
-        let wasPaused = !video.autoplay
-        let previousRate = video.playbackRate
+        playNotifier.style.display = "flex"
         
         video.addEventListener("play", () => {
             videoContainer.querySelector(".video-controls-container").style.opacity = ""
             videoContainer.querySelector(".video-controls-container").style.pointerEvents = "all"
             const playNotifier = document.querySelector(".play-notifier")
-            playNotifier.style.animation = ""
-            if (window.innerWidth <= mobileThreshold) {
+            if (window.innerWidth > mobileThreshold) {
+                playNotifier.style.animation = ""
+                playNotifier.style.display = ""
+            } else {
                 playbtnPosition()
                 playNotifier.style.setProperty('display', 'none', 'important')
             }
@@ -220,17 +215,143 @@ videos.forEach(video => {
 
         //resizing controls
         function controlsResize() {           
-            let controlsSize = 25
+            let controlsSize = 25;
+            // controlsSize = getComputedStyle(videoContainer).getPropertyValue("--controls-size")
             svgs.forEach(svg => {
                 svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
                 if(!svg.classList.contains("settings-icon"))
                 if(!svg.classList.contains("mini-player-expand-icon"))  
                 if(!svg.classList.contains("mini-player-cancel-icon"))
                 if(!svg.classList.contains("replay-icon")) 
+                if(!svg.classList.contains("fwd-notifier-icon")) 
+                if(!svg.classList.contains("bwd-notifier-icon"))
                     svg.setAttribute("viewBox", `0 0 ${controlsSize} ${controlsSize}`)
             })
         }
         controlsResize()
+        //skip variable for time skips
+        let skipped;
+        
+        //variable to check if video is in view
+        let videoInView = true;
+
+        //a variable containing the delay for all delay required events
+        let notifierDelay = getComputedStyle(notifiersContainer).getPropertyValue("--delay")
+        notifierDelay = notifierDelay.replace("s","")
+        notifierDelay = Number(notifierDelay)*1000
+
+        //a throttle function to limit number of clicks in a certain time
+        const throttleKeyPresses = (mainFunction, delay = notifierDelay) => {
+            let runTimerFlag = null;
+            return function(...args) {
+                if (runTimerFlag === null) {
+                    mainFunction(...args)
+                    runTimerFlag = setTimeout(() => {
+                        runTimerFlag = null
+                    }, delay)
+                }
+            }
+        }        
+
+        document.addEventListener("keydown", throttleKeyPresses(function(e) {
+            if(videoInView) {
+                const tagName = document.activeElement.tagName.toLowerCase()
+            
+                if(tagName === "input") return
+            
+                switch (e.key.toLowerCase()) {
+                    case " ":
+                        if(tagName === "button") return
+                    e.preventDefault()
+                    case "p":
+                    case "l":
+                    case "a":
+                    case "y":
+                    case "k":
+                        togglePlay()
+                        break
+                    case "f":
+                        toggleFullScreenMode()
+                        fire("fullScreen")
+                        break
+                    case "t":
+                        toggleTheaterMode()
+                        fire("theatre")
+                        break
+                    case "e":
+                        expandMiniPlayer()
+                        break
+                    case "r":
+                        toggleMiniPlayerMode(false)
+                        break
+                    case "i":
+                        if(!e.shiftKey)
+                            togglePictureInPictureMode()
+                            break
+                    case "m":
+                        toggleMute()
+                        video.muted ? fire("volumemuted") : fire("volumeup")
+                        break
+                    case "s": 
+                        changePlaybackSpeed()
+                        fire("speed")
+                        break
+                    case "c":
+                        toggleCaptions()
+                        fire("captions")
+                        break
+                    case "arrowleft":
+                            skip(-5)
+                            skipped = 5
+                            if(e.shiftKey) {
+                                skip(-10)
+                                skipped = 10
+                            }
+                            fire("bwd")
+                            break
+                    case "arrowright":
+                        case "":
+                            skip(5)
+                            skipped = 5
+                            if(e.shiftKey) { 
+                                skip(10)
+                                skipped = 10
+                            }
+                            fire("fwd")
+                            break
+                    case "arrowup":
+                        e.preventDefault()
+                        if(video.volume < 1) video.volume += ((video.volume*100).toFixed()%5) ? (0.05 - video.volume%0.05) : 0.05
+                        fire("volumeup")
+                        break
+                    case "arrowdown":
+                        e.preventDefault()
+                        if(video.volume == 0) {
+                            fire("volumemuted")
+                            break
+                        }
+                        if((video.volume*100).toFixed() == 5) {
+                            fire("volumemuted")
+                            video.volume = 0;
+                            break
+                        }
+                        if(video.volume) video.volume -= ((video.volume*100).toFixed()%5) ? (video.volume%0.05) : 0.05
+                        fire("volumedown")
+                }
+            }
+            })
+        )
+    
+
+        //Disabling right click
+        video.addEventListener("contextmenu", e => e.preventDefault())
+        
+        //Loading 
+        video.addEventListener("waiting", () => videoContainer.classList.add("buffer"))
+        video.addEventListener("playing", () => videoContainer.classList.remove("buffer"))
+        
+        //Timeline
+        timelineContainer.addEventListener("mousemove", handleTimelineUpdate)
         
         timelineContainer.addEventListener("pointerdown", e => {
             timelineContainer.setPointerCapture(e.pointerId)
@@ -246,16 +367,17 @@ videos.forEach(video => {
         })
         
         let isScrubbing = false
+        let wasPaused = video.autoplay
         function toggleScrubbing(e) {
             const rect = timelineContainer.getBoundingClientRect()
             const percent = Math.min(Math.max(0, e.clientX - rect.x), rect.width) / rect.width
             videoContainer.classList.toggle("scrubbing", isScrubbing)
             if (isScrubbing) {
                 wasPaused = video.paused
-                togglePlay(false)
+                video.pause()
             } else {
                 video.currentTime = percent * video.duration
-                if(!wasPaused) togglePlay(true)     
+                if (!wasPaused) video.play()     
             }
         
             handleTimelineUpdate(e)
@@ -263,11 +385,11 @@ videos.forEach(video => {
          
         function handleTimelineUpdate(e) { 
             const rect = timelineContainer.getBoundingClientRect()
-            const percent = (e.clientX - rect.x) / rect.width
+            const percent = Math.min(Math.max(0, e.clientX - rect.x), rect.width) / rect.width
             const previewImgMin = (previewImg.offsetWidth / 2) / rect.width
-            const previewImgPercent = clamp(previewImgMin, percent, (1 - previewImgMin))
-            const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10))
-            const previewImgSrc = `../assets/previewImgs/preview${previewImgNumber}.jpg`
+            const previewImgPercent = Math.min(Math.max(percent, previewImgMin),(1 - previewImgMin))
+            const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 2))
+            const previewImgSrc = `assets/tastey-dining-video-preview-imgs/preview${previewImgNumber}.jpg`
             const previewTime = parseInt(percent * video.duration) > 0 ? formatDuration(percent * video.duration) : ''
             previewImg.src = previewImgSrc
             timelineContainer.style.setProperty("--preview-position", percent)
@@ -278,36 +400,47 @@ videos.forEach(video => {
                 timelineContainer.style.setProperty("--progress-position", percent)
             }
         }
-                
+        
+        //Playback Speed
+        speedBtn.addEventListener("click", changePlaybackSpeed)
+        
         function changePlaybackSpeed() {
             let newPlaybackRate = video.playbackRate + .25
             if (newPlaybackRate > 2) newPlaybackRate = .25
+            videoContainer.querySelector(".speed-notifier > p").textContent = `${newPlaybackRate}x`
             video.playbackRate = newPlaybackRate
         }
         
-        function handlePlaybackChange() {
-            speedBtn.textContent = `${video.playbackRate}x`
-            notifiersContainer.querySelector(".speed-notifier").textContent = `${video.playbackRate}x`  
-        }
-
+        video.addEventListener("ratechange", () => {
+            speedBtn.textContent = `${video.playbackRate}x`    
+        })
+        
         //Captions
         const captions = video.textTracks[0]
         captions.mode = "hidden"
-                
+        
+        captionsBtn.addEventListener("click", toggleCaptions)
+        
         function toggleCaptions() {
             const isHidden = captions.mode === "hidden"
             captions.mode = isHidden ? "showing" : "hidden"
             videoContainer.classList.toggle("captions", isHidden)
         }
-    
-        function handleTimeUpdate() {
+        
+        //Duration
+        video.addEventListener("loadeddata", () => totalTimeElem.textContent = formatDuration(video.duration))
+        
+        video.addEventListener("timeupdate", () => {
             currentTimeElem.textContent = formatDuration(video.currentTime)
             const percent = video.currentTime / video.duration
             timelineContainer.style.setProperty("--progress-position", percent)
-            if(video.currentTime < video.duration)videoContainer.classList.remove("replay")
-        }
+            if(video.currentTime < video.duration)
+                videoContainer.classList.remove("replay")
+        })
         
-        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2})
+        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
+            minimumIntegerDigits: 2,
+        })
         
         function formatDuration(time) {
             const seconds = Math.floor(time % 60)
@@ -318,31 +451,42 @@ videos.forEach(video => {
             else 
                 return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(seconds)}`
         }
-                
+        
+        //a function for time skips
+        function skip(duration) {
+            video.currentTime += duration
+        }
+        
+        //Volume
+        muteBtn.addEventListener("click", toggleMute)
+        
+
         function toggleMute() {
             video.muted = !video.muted
         }
 
-        function handleSliderInput(e) {
-            video.volume = e.target.value / 100
+        volumeSlider.addEventListener("input", e => {
+            video.volume = (e.target.value / 100)
             video.muted = e.target.value === 0
-        }
-                    
+        })
+        
+        video.addEventListener("volumechange", volumeState)
+            
         function volumeState() {
             let { min, max, value, offsetWidth } = volumeSlider
             value = (video.volume * 100).toFixed()
-            notifiersContainer.querySelector(".volume-notifier-content").dataset.volume = value
+            videoContainer.querySelectorAll(".volume-up-notifier,.volume-down-notifier,.volume-muted-notifier").forEach((elem) => {
+                elem.dataset.volume = `${value}%`
+            })
             let volumeLevel = ""
-            if (video.muted || value == 0) {
+            if (video.muted || value === 0) {
                 value = 0
                 volumeLevel = "muted"
-            } else if (value > (max/2)) {
+            } else if (value > (max/2)) 
                 volumeLevel = "high"
-            }
-            else {
+            else 
                 volumeLevel = "low"
-            }
-            let volumePosition = `${((value - min) / (max - min)) * ((offsetWidth - 5) > 0 ? (offsetWidth - 5) : 40.5)}px`
+            let volumePosition = `${((value - min) / (max - min)) * ((offsetWidth - 5) > 0 ? (offsetWidth - 5) : 40.5) }px`
             let volumePercent = `${((value-min) / (max - min)) * 100}%`
             volumeSlider.value = value
             volumeSlider.dataset.volume = `${value}`
@@ -352,56 +496,30 @@ videos.forEach(video => {
         }
         
         volumeState()
-                
-        function handleReplay() {
+        
+        video.addEventListener("ended", () => videoContainer.classList.add("replay"))
+
+        replayBtn.addEventListener("click", () => {
             video.currentTime = 0
             video.play()
             videoContainer.classList.remove("replay")
-        }
-
-        let durationId = null
-        let pValue = 0
-        let currentNotifier
-        //a function for time skips
-        function skip(duration, persist = false) {
-            if (!videoContainer.classList.contains("replay")) {
-
-            }
-            video.currentTime += duration
-            const notifier = duration > 0 ? notifiersContainer.querySelector(".fwd-notifier") : notifiersContainer.querySelector(".bwd-notifier")
-            if (persist) {
-                const transitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--dbc-transition-time").replace('ms', '')) + 10
-                if (notifier != currentNotifier) {
-                    pValue = 0
-                    currentNotifier?.classList.remove('persist')
-                }
-                currentNotifier = notifier
-                notifier.classList.add('persist')
-                pValue += Math.abs(duration)
-                if ((video.currentTime === 0 && notifier.classList.contains("bwd-notifier")) || (video.currentTime === video.duration && notifier.classList.contains("fwd-notifier"))) {
-                    pValue = 0
-                }
-                if (durationId) clearTimeout(durationId)
-                durationId = setTimeout(() => {
-                    pValue = 0
-                    notifier.classList.remove('persist')
-                }, transitionTime)
-                notifier.dataset.skip = pValue
-                return
-            } 
-            if ((video.currentTime === 0 && notifier.classList.contains("bwd-notifier")) || (video.currentTime === video.duration && notifier.classList.contains("fwd-notifier"))) {
-                duration = 0
-            }            
-            notifier.dataset.skip = Math.abs(duration)
-        }
-
-        //a fnction to handle double tap to skip
+        })
+        
+        // View Modes
+        theaterBtn.addEventListener("click", toggleTheaterMode)
+        fullScreenBtn.addEventListener("click", toggleFullScreenMode)
+        pictureInPictureBtn.addEventListener("click", togglePictureInPictureMode)
+        miniPlayerExpandBtn.addEventListener("click", expandMiniPlayer)
         function doubletapToSkip(e) {
             const rect = video.getBoundingClientRect()
             if (((e.clientX-rect.left) > (video.offsetWidth*0.65))) {
-                skip(10, true)
+                skip(10)
+                skipped = 10
+                fire("fwd")
             } else if ((e.clientX-rect.left) < (video.offsetWidth*0.35)) {
-                skip(-10, true)
+                skip(-10)
+                skipped = 10
+                fire("bwd")
             }
         }
 
@@ -426,6 +544,8 @@ videos.forEach(video => {
             })
         }
 
+        miniPlayerCancelBtn.addEventListener("click", () => toggleMiniPlayerMode(false))
+
         function toggleTheaterMode() {
             videoContainer.classList.toggle("theater")
         }
@@ -433,9 +553,11 @@ videos.forEach(video => {
         function toggleFullScreenMode() {
             if (document.fullscreenElement == null) {
                 if (screen.orientation && screen.orientation.lock && screen.orientation.type.startsWith("portrait")) {  
-                    screen.orientation.lock('landscape')
-                    .then(() => console.log('Video was changed to fullscreen so orientation was locked to landscape.'))
-                    .catch(error => console.error('Failed to lock orientation:', error))
+                    screen.orientation.lock('landscape').then(() => {  
+                        console.log('Video was changed to fullscreen so orientation was locked to landscape.');  
+                    }).catch(function(error) {  
+                        console.error('Failed to lock orientation:', error);  
+                    })
                 }  
                 videoContainer.requestFullscreen()
             } else {
@@ -457,21 +579,23 @@ videos.forEach(video => {
         //a variable to check if the user is concerned in the current video while in mini-player mode
         let concerned = false
         function toggleMiniPlayerMode(bool = true) {
-        const threshold = 240
+        const threshold = 0
         if(!document.fullscreenElement) {
             if (!bool) {
                 cleanUpMiniPlayer()
-                if(!video.paused && !concerned) togglePlay(false)
+                if(!video.paused && !concerned) video.pause() 
                 concerned = false
                 return
             }
-            if (!video.paused && window.innerWidth >= threshold && !document.pictureInPictureElement && !intersect) {
+            if (!video.paused && window.innerWidth > threshold && !document.pictureInPictureElement && !intersect) {
                 videoContainer.classList.add("mini-player")
                 videoContainer.addEventListener("mousedown", moveMiniPlayer)
                 videoContainer.addEventListener("touchstart", moveMiniPlayer, {passive: false})
                 miniPlayerBtnPosition()
             } 
-            if ((videoContainer.classList.contains("mini-player") && intersect) || (videoContainer.classList.contains("mini-player") && window.innerWidth < threshold)) cleanUpMiniPlayer()
+            if ((videoContainer.classList.contains("mini-player") && intersect) || (videoContainer.classList.contains("mini-player") && window.innerWidth < threshold)) {
+                cleanUpMiniPlayer()
+            }
             function cleanUpMiniPlayer() {
                 videoContainer.classList.remove("mini-player")
                 videoContainer.removeEventListener("mousedown", moveMiniPlayer)
@@ -483,235 +607,99 @@ videos.forEach(video => {
         }
         
         //Intersection Observer Setup to watch the video
-        let intersect = false
-        const videoObserver = new IntersectionObserver(entries => {
+        let intersect = false;
+        let videoOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: (() => {
+                let threshold = []
+                let step = 20
+                for(let i = 1.0; i <= step; i++) {
+                    let ratio = i/step
+                    threshold.push(ratio)
+                }
+                threshold.push(0)
+                return threshold;
+            })(),
+        }
+        const videoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if(entry.target != video) {
                     intersect = entry.isIntersecting
                     toggleMiniPlayerMode()
                 } else {
-                    if (entry.isIntersecting) {
-                        document.addEventListener("keydown", handleSpaceBarDown)
-                        document.addEventListener("keydown", handleKeyDown)
-                    }
-                    else {
-                        document.removeEventListener("keydown", handleSpaceBarDown)
-                        document.removeEventListener("keydown", handleKeyDown)
-                    }
+                    videoInView = entry.isIntersecting
                 }
         })
-        }, {root: null, rootMargin: '0px', threshold: 0})
+        }, videoOptions)
         videoObserver.observe(videoContainer.parentElement)
         videoObserver.observe(video)
-
-        let scounter = 0, speedCheck = false, speedId
-        const speedNotifier = notifiersContainer.querySelector(".speed-notifier")
         
-        function speedUp() {
-            speedCheck = true
-            wasPaused = video.paused
-            previousRate = video.playbackRate
-            if(wasPaused) togglePlay(true)
-            video.playbackRate = 2
-            speedNotifier.classList.add("active")
-            videoContainer.classList.add("movement")
-        }
-
-        function slowDown() {
-            speedCheck = false
-            if(wasPaused) togglePlay(false)
-            video.playbackRate = previousRate
-            speedNotifier.classList.remove("active")
-            videoContainer.classList.remove('movement')
-        }
-
-        function handleSpaceBarDown(e) {
-            const tagName = document.activeElement.tagName.toLowerCase()
-            if (tagName === "input") return
-
-            if (e.key === " ") {
-                if(tagName === "button") return
-                e.stopImmediatePropagation()
-                e.preventDefault()
-                scounter ++
-                if(scounter === 1) document.addEventListener("keyup", handleSpaceBarUp, {once:true})
-                if(scounter === 2) speedUp()
-            }
-
-            function handleSpaceBarUp() {
-                if (scounter === 1) {
-                    togglePlay()
-                    video.paused ? fire("videopause") : fire("videoplay") 
-                }
-                if (speedCheck && scounter > 1) slowDown()
-                scounter = 0
-            }            
-        }
-
-        function handlePointerDown() {
-            if (!videoContainer.classList.contains("mini-player")) {
-                videoContainer.addEventListener("pointerup", handlePointerUp, {once:true})
-                videoContainer.addEventListener("pointerleave", handlePointerUp, {once:true})
-                speedId = setTimeout(speedUp, 500)
-                function handlePointerUp(e) {
-                    if(speedId) clearTimeout(speedId)
-                    if(speedCheck && scounter < 1) slowDown()
-                    else {
-                        const rect = video.getBoundingClientRect()
-                        if (((e.clientX-rect.left) > (video.offsetWidth*0.35)) && ((e.clientX-rect.left) < (video.offsetWidth*0.75))) {
-                            togglePlay()
-                            video.paused ? fire("videopause") : fire("videoplay") 
-                        } else if(window.innerWidth > (mobileThreshold+300)) {
-                            togglePlay()  
-                            video.paused ? fire("videopause") : fire("videoplay")               
-                        }            
-                    }
-                    videoContainer.removeEventListener("pointerup", handlePointerUp, {once:true})
-                    videoContainer.removeEventListener("pointerleave", handlePointerUp, {once:true})
-                }                
-            }
-        }
-
-        function handleKeyDown(e) {
-            const tagName = document.activeElement.tagName.toLowerCase()
-            
-            if(tagName === "input") return
-            
-            switch (e.key.toLowerCase()) {
-                case "p":
-                case "l":
-                case "a":
-                case "y":
-                case "k":
-                    togglePlay()
-                    video.paused ? fire("videopause") : fire("videoplay")
-                    break
-                case "f":
-                    toggleFullScreenMode()
-                    fire("fullScreen")
-                    break
-                case "t":
-                    if (window.innerWidth > mobileThreshold || !videoContainer.contains('.mini-player')) {
-                        toggleTheaterMode()
-                        fire("theatre")
-                    }
-                    break
-                case "e":
-                    expandMiniPlayer()
-                    break
-                case "r":
-                    toggleMiniPlayerMode(false)
-                    break
-                case "i":
-                    if(!e.shiftKey) togglePictureInPictureMode()
-                    break
-                case "m":
-                    toggleMute()
-                    video.muted ? fire("volumemuted") : fire("volumeup")
-                    break
-                case "s": 
-                    changePlaybackSpeed()
-                    fire("speed")
-                    break
-                case "c":
-                    toggleCaptions()
-                    fire("captions")
-                    break
-                case "arrowleft":
-                    skip(-5)
-                    if(e.shiftKey) skip(-10)
-                    fire("bwd")
-                    break
-                case "arrowright":
-                    skip(5)
-                    if(e.shiftKey) skip(10)
-                    fire("fwd")
-                    break
-                case "arrowup":
-                    e.preventDefault()
-                    volumeChange("increment", 5)
-                    break
-                case "arrowdown":
-                    e.preventDefault()
-                    volumeChange("decrement", 5)
-                    break
-            }
-        }        
-        
-        function volumeChange(type, value) {
-            const n = value / 100
-            switch(type) {
-                case "increment":
-                    if ((video.volume*100).toFixed() == 95) {
-                        video.volume = 1
-                        fire("volumeup")
-                        break
-                    }
-                    if((video.volume*100).toFixed() < 100) video.volume += ((video.volume*100).toFixed()%value) ? (n - video.volume%n).toFixed(2) : n 
-                    fire("volumeup")
-                    break
-                case "decrement":
-                    if(video.volume == 0 || (video.volume*100).toFixed() == 5) {
-                        video.volume = 0
-                        fire("volumemuted")
-                        break
-                    }
-                    if (video.volume) video.volume -= ((video.volume*100).toFixed()%value) ? (video.volume%n) : n   
-                    fire("volumedown")
-                    break
-            }
-        }
-
-        function handleFullScreenChange() {
+        document.addEventListener("fullscreenchange", () => {
             videoContainer.classList.toggle("full-screen", document.fullscreenElement)            
             if(videoContainer.classList.contains("mini-player") && videoContainer.classList.contains("full-screen")) videoContainer.classList.remove("mini-player")
             playbtnPosition()
-        }
+        })
+        document.addEventListener("webkitfullscreenchange", ()=> {
+            videoContainer.classList.toggle("full-screen", document.fullscreenElement)
+            if(videoContainer.classList.contains("mini-player") && videoContainer.classList.contains("full-screen")) videoContainer.classList.remove("mini-player")
+        })
 
-        function handleResize() {
+        window.addEventListener('resize', () => {
             toggleMiniPlayerMode()
             playbtnPosition()
             miniPlayerBtnPosition()
             tapHandler()
-        }
+        })
         
         //For the mobile play btn since the video height is not fixed value
         function playbtnPosition() {
-            if (window.innerWidth <= mobileThreshold && !videoContainer.classList.contains("mini-player")) {
-                const value = (videoContainer.offsetHeight/2) - playPauseBtn.offsetHeight/2
-                videoContainer.style.setProperty("--mobile-btn-position", `${value}px`)
-                videoContainer.style.setProperty("--video-height", video.offsetHeight)
-            }
+            setTimeout(() => {
+                if (window.innerWidth <= mobileThreshold && !videoContainer.classList.contains("mini-player")) {
+                    const value = (videoContainer.offsetHeight/2) - playPauseBtn.offsetHeight/2
+                    playPauseBtn.style.setProperty("--mobile-btn-position", `${value}px`)
+                }
+            })
         }
-        playbtnPosition()
+        window.addEventListener('load', playbtnPosition)
+        
+        function miniPlayerBtnPosition() {
+            setTimeout(() => {
+                if(videoContainer.classList.contains("mini-player")) {
+                    const value = videoContainer.offsetHeight/2 - playPauseBtn.offsetHeight/2
+                    videoContainer.style.setProperty("--mini-player-btn-position", `${value}px`)
+                }
+            })
+        }
 
-        function handleEnterPip() {
+        video.addEventListener("enterpictureinpicture", () => {
             videoContainer.classList.add("picture-in-picture")
             toggleMiniPlayerMode(false)
-        }
+        })
         
-        function handleLeavePip() {
+        video.addEventListener("leavepictureinpicture", () => {
             videoContainer.classList.remove("picture-in-picture")
             toggleMiniPlayerMode()
-        }
-
-        function miniPlayerBtnPosition() {
-            if(videoContainer.classList.contains("mini-player")) {
-                const value = videoContainer.offsetHeight/2 - playPauseBtn.offsetHeight/2
-                videoContainer.style.setProperty("--mini-player-btn-position", `${value}px`)
-                videoContainer.style.setProperty("--video-height", video.offsetHeight)
-            }
+        })
+        
+        // Play/Pause
+        playPauseBtn.addEventListener("click", togglePlay)
+        video.addEventListener("click", e => {
+            const rect = video.getBoundingClientRect()
+            if (((e.clientX-rect.left) > (video.offsetWidth*0.35)) && ((e.clientX-rect.left) < (video.offsetWidth*0.75))) togglePlay()
+            else if(window.innerWidth > (mobileThreshold+300)) togglePlay()
+        })
+        
+        function togglePlay() {
+            video.paused ? video.play() : video.pause()
         }
         
-        function togglePlay(bool) {
-            bool ?? video.paused ? video.play() : video.pause()
-        }
-
-        function handlePlay(e) {
-            for (const media of document.querySelectorAll("video, audio")) {
+        video.addEventListener("play", e => {
+            for (const media of document.querySelectorAll('video, audio')) {
                 if (media !== e.target) media.pause()
             }
             videoContainer.classList.remove("paused")
+            fire("videoplay")
 
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -721,49 +709,55 @@ videos.forEach(video => {
                     ]
                 })
     
-                navigator.mediaSession.setActionHandler('play', () => togglePlay(true))
-                navigator.mediaSession.setActionHandler('pause', () => togglePlay(false))
-                navigator.mediaSession.setActionHandler('seekbackward', () => skip(-10))
-                navigator.mediaSession.setActionHandler('seekforward', () => skip(10))
+                navigator.mediaSession.setActionHandler('play', ()=>{video.play()})
+                navigator.mediaSession.setActionHandler('pause', ()=>{video.pause()})
+                navigator.mediaSession.setActionHandler('seekbackward', ()=>{skip(-10)})
+                navigator.mediaSession.setActionHandler('seekforward', ()=>{skip(10)})
                 navigator.mediaSession.playbackState = 'playing'
             }            
-
-        }
-                
-        function handlePause() {
+        })
+        
+        video.addEventListener("pause", ()=> {
             videoContainer.classList.add("paused")
+            fire("videopause")
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'
-        }
+        })        
         
         const restraintTime = 3000
         let restraintId
-        function handleMouseMove() {
+        videoContainer.addEventListener("mousemove", () => {
             videoContainer.classList.add("hover")
             restraint()
-        }
+        })
         function restraint() {
             if (restraintId) clearTimeout(restraintId)
-            restraintId = setTimeout(() => videoContainer.classList.remove("hover"), restraintTime)
+            restraintId = setTimeout(() => {
+                videoContainer.classList.remove("hover")
+            }, restraintTime)
         }
 
         let restraintIdTwo, hoverId
-        function handleVolumeMouseMove() {
+        volumeSlider.parentElement.addEventListener("mousemove", () => {
             hoverId = setTimeout(() => {
                 if (volumeSlider.parentElement.matches(':hover')) {
                     volumeSlider.parentElement.classList.add("hover")
                     if (restraintIdTwo) clearTimeout(restraintIdTwo)
-                    restraintIdTwo = setTimeout(() => volumeSlider.parentElement.classList.remove("hover"), restraintTime)  
+                    restraintIdTwo = setTimeout(() => {
+                        volumeSlider.parentElement.classList.remove("hover")
+                    }, restraintTime)                    
                 }
             }, 250)
-        }
+        })
+
+        volumeSlider.parentElement.addEventListener("mouseup", () => {if (hoverId) clearTimeout(hoverId)})
         
         function moveMiniPlayer(e){
             if (!e.target.classList.contains(".timeline-container") && !e.target.classList.contains("timeline") && e.target.tagName !== "button") {
                 if (videoContainer.classList.contains("mini-player")) {
                     videoContainer.addEventListener("mousemove", handleMiniPlayerPosition)
-                    videoContainer.addEventListener("mouseup", emptyListeners, {once: true})
                     videoContainer.addEventListener("touchmove", handleMiniPlayerPosition, {passive: false})
                     videoContainer.addEventListener("touchend", emptyListeners, {once: true, passive: false})
+                    videoContainer.addEventListener("mouseup", emptyListeners, {once: true})
                 }
             }
 
@@ -773,6 +767,8 @@ videos.forEach(video => {
                 restraint()
                 videoContainer.removeEventListener("mousemove", handleMiniPlayerPosition)
                 videoContainer.removeEventListener("touchmove", handleMiniPlayerPosition, {passive: false})
+                videoContainer.removeEventListener("touchend", emptyListeners, {once: true, passive: false})
+                videoContainer.removeEventListener("mouseup", emptyListeners, {once: true})
             }
 
             function handleMiniPlayerPosition(e) {
@@ -799,85 +795,60 @@ videos.forEach(video => {
             el.dispatchEvent(evt)
         }
 
-        const events = ["videoplay","videopause","volumeup","volumedown","volumemuted","captions","speed","theatre","fullScreen","fwd","bwd"]
-        let transitionId
-        const notify = {
-            init : function() {
-                for (const event of events) {
-                    notifiersContainer.addEventListener(event, this)
-                }
-            },
-
-            handleEvent: function(e) {
-                let transitionTime
-                if (e.type === "fwd" || e.type === "bwd") {
-                    transitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--dbc-transition-time").replace('ms', '')) + 10
-                } else {
-                    transitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--transition-time").replace('ms', '')) + 10
-                }
-                if (transitionId) clearTimeout(transitionId)
-                notifiersContainer.dataset.currentNotifier = e.type
-                transitionId = setTimeout(emptyDataset, transitionTime)
-            }
-        }
-        notify.init()
-        
-        for(const notifier of notifiersContainer.children) {
-            notifier.addEventListener('transitionend', emptyDataset)
-        }
+        //event listeners for notifiers
+        notifiersContainer.addEventListener("videopause", () => {
+            notifiersContainer.dataset.currentNotifier = "videopause"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("videoplay", () => {
+            notifiersContainer.dataset.currentNotifier = "videoplay"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("volumeup", () => {
+            notifiersContainer.dataset.currentNotifier = "volumeup"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("volumedown", () => {
+            notifiersContainer.dataset.currentNotifier = "volumedown"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("volumemuted", () => {
+            notifiersContainer.dataset.currentNotifier = "volumemuted"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("captions", () => {
+            notifiersContainer.dataset.currentNotifier = "captions"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("speed", () => {
+            notifiersContainer.dataset.currentNotifier = "speed"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("theatre", () => {
+            notifiersContainer.dataset.currentNotifier = "theatre"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("fullScreen", () => {
+            notifiersContainer.dataset.currentNotifier = "full-screen"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("fwd", () => {
+            notifiersContainer.querySelectorAll(".fwd-notifier,.bwd-notifier").forEach(elem => {
+                elem.dataset.skip = `${skipped} seconds`
+            })
+            notifiersContainer.dataset.currentNotifier = "fwd"
+            emptyDataset()
+        })
+        notifiersContainer.addEventListener("bwd", () => {
+            notifiersContainer.querySelectorAll(".fwd-notifier,.bwd-notifier").forEach(elem => {
+                elem.dataset.skip = `${skipped} seconds`
+            })
+            notifiersContainer.dataset.currentNotifier = "bwd"
+            emptyDataset()
+        })
         function emptyDataset() {
-            notifiersContainer.dataset.currentNotifier = ''
+            setTimeout(()=>{notifiersContainer.dataset.currentNotifier = ''}, notifierDelay)
         }
-
-        //Event Listeners
-
-        //window event listeners
-        window.addEventListener('load', playbtnPosition)
-        window.addEventListener('resize', handleResize)
-
-        //document event listeners
-        document.addEventListener("fullscreenchange", handleFullScreenChange)
-        document.addEventListener("webkitfullscreenchange", handleFullScreenChange)
-
-        //button event listeners 
-        playPauseBtn.addEventListener("click", () => togglePlay())
-        speedBtn.addEventListener("click", changePlaybackSpeed)
-        captionsBtn.addEventListener("click", toggleCaptions)
-        muteBtn.addEventListener("click", toggleMute)
-        replayBtn.addEventListener("click", handleReplay)
-        theaterBtn.addEventListener("click", toggleTheaterMode)
-        fullScreenBtn.addEventListener("click", toggleFullScreenMode)
-        pictureInPictureBtn.addEventListener("click", togglePictureInPictureMode)
-        miniPlayerExpandBtn.addEventListener("click", expandMiniPlayer)
-        miniPlayerCancelBtn.addEventListener("click", () => toggleMiniPlayerMode(false))        
-
-        //videocontainer event listeners
-        videoContainer.addEventListener("mousemove", handleMouseMove)
-
-
-        //video event listeners
-        video.addEventListener("play", handlePlay)
-        video.addEventListener("pause", handlePause)        
-        video.addEventListener("contextmenu", e => e.preventDefault())
-        video.addEventListener("waiting", () => videoContainer.classList.add("buffer"))
-        video.addEventListener("playing", () => videoContainer.classList.remove("buffer"))
-        video.addEventListener("ratechange", handlePlaybackChange)      
-        video.addEventListener("timeupdate", handleTimeUpdate)
-        video.addEventListener("volumechange", volumeState)
-        video.addEventListener("loadeddata", () => totalTimeElem.textContent = formatDuration(video.duration))
-        video.addEventListener("ended", () => videoContainer.classList.add("replay"))
-        video.addEventListener("pointerdown", handlePointerDown)
-        video.addEventListener("enterpictureinpicture", handleEnterPip)
-        video.addEventListener("leavepictureinpicture", handleLeavePip)
-
-        
-        //timeline contanier event listeners
-        timelineContainer.addEventListener("mousemove", handleTimelineUpdate)
-
-        //volume event listeners
-        volumeSlider.addEventListener("input", handleSliderInput)
-        volumeSlider.parentElement.addEventListener("mousemove", handleVolumeMouseMove)
-        volumeSlider.parentElement.addEventListener("mouseup", () => {if(hoverId) clearTimeout(hoverId)})
     } else {
         return
     }
