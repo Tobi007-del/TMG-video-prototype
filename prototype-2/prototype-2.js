@@ -457,11 +457,11 @@ for(const video of videos) {
         function handleTimelineUpdate(e) { 
             const rect = timelineContainer.getBoundingClientRect()
             const percent = clamp(e.clientX - rect.x, 0, rect.width) / rect.width
-            const previewImgMin = (previewImg.offsetWidth / 2) / rect.width
+            const previewImgMin = (previewImgContainer.offsetWidth / 2) / rect.width
             const previewImgPercent = clamp(previewImgMin, percent, (1 - previewImgMin))
             const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10))
             const previewImgSrc = `../assets/previewImgs/preview${previewImgNumber}.jpg`
-            const previewTime = parseInt(percent * video.duration) > 0 ? formatDuration(percent * video.duration) : ''
+            const previewTime = parseInt(percent * video.duration) >= 0 ? formatDuration(percent * video.duration) : ''
             previewImg.src = previewImgSrc
             timelineContainer.style.setProperty("--preview-position", percent)
             timelineContainer.style.setProperty("--preview-img-position", previewImgPercent)
