@@ -353,17 +353,15 @@ for(const video of videos) {
         //For the mobile play btn since the video height is not fixed value
         function playbtnPosition() {
             if (window.innerWidth <= mobileThreshold && !videoContainer.classList.contains("mini-player")) {
-                const value = (videoContainer.offsetHeight/2) - playPauseBtn.offsetHeight/2
+                const value = Math.round((videoContainer.offsetHeight/2) - playPauseBtn.offsetHeight/2)
                 videoContainer.style.setProperty("--mobile-btn-position", `${value}px`)
-                videoContainer.style.setProperty("--video-height", video.offsetHeight)
             }
         }
 
         function miniPlayerBtnPosition() {
             if(videoContainer.classList.contains("mini-player")) {
-                const value = videoContainer.offsetHeight/2 - playPauseBtn.offsetHeight/2
+                const value = Math.round(videoContainer.offsetHeight/2 - playPauseBtn.offsetHeight/2)
                 videoContainer.style.setProperty("--mini-player-btn-position", `${value}px`)
-                videoContainer.style.setProperty("--video-height", video.offsetHeight)
             }
         }        
 
