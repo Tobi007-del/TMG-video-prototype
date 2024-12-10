@@ -214,27 +214,12 @@ for(const video of videos) {
         previewImgContainer = videoContainer.querySelector(".preview-img-container"),
         timelineContainer = videoContainer.querySelector(".timeline-container"),
         svgs = videoContainer.querySelectorAll("svg"),
-        notifiersContainer = videoContainer.querySelector(".notifiers-container")        
-
+        notifiersContainer = videoContainer.querySelector(".notifiers-container"),
+        speedNotifier = notifiersContainer.querySelector(".speed-notifier"),
+        restraintTime = 3000,
         //some general variables
-        let wasPaused = !video.autoplay, 
-        previousRate = video.playbackRate,
-        isScrubbing = false,
-        concerned = false,
-        intersect = false,
-        scounter = 0, 
-        speedCheck = false, 
-        speedId,
-        durationId = null,
-        pValue = 0,
-        currentNotifier,
-        restraintId,
-        restraintIdTwo, 
-        hoverId,
-        transitionId
-
-        const restraintTime = 3000,
-        captions = video.textTracks[0],
+        captions = video.textTracks[0],   
+        leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2}),           
         //custom events for notifying user
         events = ["videoplay","videopause","volumeup","volumedown","volumemuted","captions","speed","theatre","fullScreen","fwd","bwd"],
         fire = (eventName, el = notifiersContainer, detail=null, bubbles=true, cancellable=true) => {
@@ -248,7 +233,6 @@ for(const video of videos) {
                 for(const notifier of notifiersContainer.children) {
                     notifier.addEventListener('transitionend', this.resetNotifiers)
                 }
-        
                 for (const event of events) {
                     notifiersContainer.addEventListener(event, this)
                 }
@@ -269,7 +253,43 @@ for(const video of videos) {
             resetNotifiers: function() {
                 notifiersContainer.dataset.currentNotifier = ''
             }
-        }        
+        },
+        //Intersection Observer Setup to watch the vieo
+        videoObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.target != video) {
+                    intersect = entry.isIntersecting
+                    toggleMiniPlayerMode()
+                } else {
+                    if (entry.isIntersecting) {
+                        document.addEventListener("keydown", handleSpaceBarDown)
+                        document.addEventListener("keydown", handleKeyDown)
+                    }
+                    else {
+                        document.removeEventListener("keydown", handleSpaceBarDown)
+                        document.removeEventListener("keydown", handleKeyDown)
+                    }
+                }
+        })
+        }, {root: null, rootMargin: '0px', threshold: 0})
+        videoObserver.observe(videoContainer.parentElement)
+        videoObserver.observe(video)         
+
+        let wasPaused = !video.autoplay, 
+        previousRate = video.playbackRate,
+        isScrubbing = false,
+        concerned = false,
+        intersect = false,
+        scounter = 0, 
+        speedCheck = false, 
+        speedId,
+        durationId = null,
+        pValue = 0,
+        currentNotifier,
+        restraintId,
+        restraintIdTwo, 
+        hoverId,
+        transitionId
 
         //Event Listeners
         //window event listeners
@@ -294,16 +314,7 @@ for(const video of videos) {
 
         //videocontainer event listeners
         videoContainer.addEventListener("mousemove", handleMouseMove)
-        function tapHandler() {
-            if ((navigator.maxTouchPoints > 0) && (window.innerWidth < (mobileThreshold+300))) {
-                video.removeEventListener("dblclick", toggleFullScreenMode)
-                video.addEventListener("dblclick", doubletapToSkip)
-            } else {
-                video.removeEventListener("dblclick", doubletapToSkip)
-                video.addEventListener("dblclick", toggleFullScreenMode)
-            }
-        }
-
+        
         //video event listeners
         video.addEventListener("play", handlePlay)
         video.addEventListener("pause", handlePause)        
@@ -316,10 +327,10 @@ for(const video of videos) {
         video.addEventListener("loadeddata", () => totalTimeElem.textContent = formatDuration(video.duration))
         video.addEventListener("ended", () => videoContainer.classList.add("replay"))
         video.addEventListener("mousedown", handlePointerDown)
-        video.addEventListener("touchstart", handlePointerDown)
+        video.addEventListener("touchstart", handlePointerDown, {passive: true})
+        video.addEventListener("dblclick", doubleTapHandler)
         video.addEventListener("enterpictureinpicture", handleEnterPip)
         video.addEventListener("leavepictureinpicture", handleLeavePip)
-
 
         //timeline contanier event listeners
         timelineContainer.addEventListener("pointerdown", handleTimelineScrubbing)
@@ -334,7 +345,6 @@ for(const video of videos) {
         controlsResize()
         volumeState()
         playbtnPosition()
-        tapHandler()
         notify.init()
 
         //resizing controls
@@ -370,7 +380,6 @@ for(const video of videos) {
             toggleMiniPlayerMode()
             playbtnPosition()
             miniPlayerBtnPosition()
-            tapHandler()
         }
 
         //Play and Pause States
@@ -477,8 +486,6 @@ for(const video of videos) {
             if(video.currentTime < video.duration) videoContainer.classList.remove("replay")
         }
     
-        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2})
-        
         function formatDuration(time) {
             const seconds = Math.floor(time % 60)
             const minutes = Math.floor(time / 60) % 60
@@ -521,13 +528,13 @@ for(const video of videos) {
         }
 
         //a fnction to handle double tap to skip
-        function doubletapToSkip(e) {
+        function doubleTapHandler(e) {
             const rect = video.getBoundingClientRect()
             if (((e.clientX-rect.left) > (video.offsetWidth*0.65))) {
                 skip(10, true)
             } else if ((e.clientX-rect.left) < (video.offsetWidth*0.35)) {
                 skip(-10, true)
-            }
+            } else toggleFullScreenMode()
         }
                 
         //Playback
@@ -541,8 +548,6 @@ for(const video of videos) {
             speedBtn.textContent = `${video.playbackRate}x`
             notifiersContainer.querySelector(".speed-notifier").textContent = `${video.playbackRate}x`  
         }
-
-        const speedNotifier = notifiersContainer.querySelector(".speed-notifier")
         
         function speedUp() {
             speedCheck = true
@@ -697,14 +702,11 @@ for(const video of videos) {
 
         function moveMiniPlayer(e){
             if(videoContainer.classList.contains("mini-player")) {
-                if (!e.target.classList.contains(".timeline-container") && !e.target.classList.contains("timeline") && e.target.tagName !== "button") {
-                    if (videoContainer.classList.contains("mini-player")) {
-                        videoContainer.addEventListener("mousemove", handleMiniPlayerPosition)
-                        videoContainer.addEventListener("mouseup", emptyListeners, {once: true})
-                        videoContainer.addEventListener("touchmove", handleMiniPlayerPosition, {passive: false})
-                        videoContainer.addEventListener("touchend", emptyListeners, {once: true, passive: false})
-                    }
-    
+            if (!e.target.classList.contains("timeline-container") && !e.target.classList.contains("timeline") && e.target.tagName != "button") {
+                videoContainer.addEventListener("mousemove", handleMiniPlayerPosition)
+                videoContainer.addEventListener("mouseup", emptyListeners, {once: true})
+                videoContainer.addEventListener("touchmove", handleMiniPlayerPosition, {passive: false})
+                videoContainer.addEventListener("touchend", emptyListeners, {once: true, passive: false})
             }
 
             function emptyListeners() {
@@ -731,27 +733,6 @@ for(const video of videos) {
             }
         }            
         }        
-        
-        //Intersection Observer Setup to watch the video
-        const videoObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if(entry.target != video) {
-                    intersect = entry.isIntersecting
-                    toggleMiniPlayerMode()
-                } else {
-                    if (entry.isIntersecting) {
-                        document.addEventListener("keydown", handleSpaceBarDown)
-                        document.addEventListener("keydown", handleKeyDown)
-                    }
-                    else {
-                        document.removeEventListener("keydown", handleSpaceBarDown)
-                        document.removeEventListener("keydown", handleKeyDown)
-                    }
-                }
-        })
-        }, {root: null, rootMargin: '0px', threshold: 0})
-        videoObserver.observe(videoContainer.parentElement)
-        videoObserver.observe(video)
 
         //Keyboard and General Accessibility Functions
         function handleSpaceBarDown(e) {
@@ -781,19 +762,15 @@ for(const video of videos) {
             if (!videoContainer.classList.contains("mini-player")) {
                 videoContainer.addEventListener("mouseup", handlePointerUp, {once:true})
                 videoContainer.addEventListener("touchend", handlePointerUp, {once:true})
-                speedId = setTimeout(speedUp, 500)
+                speedId = setTimeout(speedUp, 1000)
                 function handlePointerUp(e) {
                     if(speedId) clearTimeout(speedId)
                     if(speedCheck && scounter < 1) slowDown()
                     else {
                         const rect = video.getBoundingClientRect()
-                        if (((e.clientX-rect.left) > (video.offsetWidth*0.35)) && ((e.clientX-rect.left) < (video.offsetWidth*0.75))) {
+                        if (((e.clientX-rect.left) > (video.offsetWidth*0.3)) && ((e.clientX-rect.left) < (video.offsetWidth*0.7))) {
                             togglePlay()
-                            video.paused ? fire("videopause") : fire("videoplay") 
-                        } else if(window.innerWidth > (mobileThreshold+300)) {
-                            togglePlay()  
-                            video.paused ? fire("videopause") : fire("videoplay")               
-                        }            
+                        }          
                     }
                     videoContainer.removeEventListener("mouseup", handlePointerUp, {once:true})
                     videoContainer.removeEventListener("touchend", handlePointerUp, {once:true})
