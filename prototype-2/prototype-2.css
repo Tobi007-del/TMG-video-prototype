@@ -208,12 +208,15 @@ body {
     opacity: .75;
 }
 
-.video-container.mini-player.hover:hover:has(.timeline-container:hover) {
+.video-container.mini-player.hover:hover:has(.timeline-container:hover), 
+.video-container.mini-player.scrubbing {
     --neutral-darker-controls-bg-color: transparent!important;
 }
 
 .video-container.mini-player.hover:hover:has(.timeline-container:hover) .mini-player-expand-btn-wrapper, 
-.video-container.mini-player.hover:hover:has(.timeline-container:hover) .mini-player-cancel-btn-wrapper {
+.video-container.mini-player.hover:hover:has(.timeline-container:hover) .mini-player-cancel-btn-wrapper,
+.video-container.mini-player.scrubbing .mini-player-expand-btn-wrapper, 
+.video-container.mini-player.scrubbing .mini-player-cancel-btn-wrapper {
     opacity: 0!important;
 }
 
