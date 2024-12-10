@@ -1081,6 +1081,8 @@ video::-webkit-media-text-track-container {
     .video-container.full-screen, 
     .notifiers {
         --controls-size: 22.5px;
+    }
+    .video-container:not(.mini-player) {
         --captions-size: var(--controls-size);
     }
     .video-container.mini-player .controls {
