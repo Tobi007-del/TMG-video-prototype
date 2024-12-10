@@ -552,7 +552,7 @@ video {
     height: calc(var(--controls-size)/2.15);
     width: calc(var(--controls-size)/2.15);
     position: relative;
-    top: -3.5px;
+    top: calc(var(--controls-size)/-6.5);
     border-radius: 50%;
 }
 
