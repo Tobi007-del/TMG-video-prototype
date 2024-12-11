@@ -818,7 +818,7 @@ video::-webkit-media-text-track-container {
 
 .notifiers-container {
     --transition-time: 500ms;
-    --dbc-transition-time: 800ms;
+    --arrows-transition-time: 800ms;
     width: 100%;
     height: 100%;
     display: flex;
@@ -975,6 +975,7 @@ video::-webkit-media-text-track-container {
     width: calc(var(--controls-size)/2.25);
     animation: none;
     animation-iteration-count: infinite;
+    animation-duration: var(--arrows-transition-time);
 }
 
 .notifiers-container[data-current-notifier = "fwd"] .fwd-notifier svg:nth-of-type(1), 
