@@ -216,8 +216,10 @@ for(const video of videos) {
         svgs = videoContainer.querySelectorAll("svg"),
         notifiersContainer = videoContainer.querySelector(".notifiers-container"),
         speedNotifier = notifiersContainer.querySelector(".speed-notifier"),
-        restraintTime = 3000,
         //some general variables
+        restraintTime = 3000,
+        notifiersTransitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--transition-time").replace('ms', '')) + 10,
+        notifierArrowsTransitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--arrows-transition-time").replace('ms', '')) + 10,        
         captions = video.textTracks[0],   
         leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2}),           
         //custom events for notifying user
@@ -239,12 +241,7 @@ for(const video of videos) {
             },
 
             handleEvent: function(e) {
-                let transitionTime
-                if (e.type === "fwd" || e.type === "bwd") {
-                    transitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--dbc-transition-time").replace('ms', '')) + 10
-                } else {
-                    transitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--transition-time").replace('ms', '')) + 10
-                }
+                const transitionTime = e.type === "fwd" || e.type === "bwd" ? notifierArrowsTransitionTime : notifiersTransitionTime
                 if (transitionId) clearTimeout(transitionId)
                 notifiersContainer.dataset.currentNotifier = e.type
                 transitionId = setTimeout(this.resetNotifiers, transitionTime)
@@ -502,7 +499,6 @@ for(const video of videos) {
             video.currentTime += duration
             const notifier = duration > 0 ? notifiersContainer.querySelector(".fwd-notifier") : notifiersContainer.querySelector(".bwd-notifier")
             if (persist) {
-                const transitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--dbc-transition-time").replace('ms', '')) + 10
                 if (notifier != currentNotifier) {
                     pValue = 0
                     currentNotifier?.classList.remove('persist')
@@ -517,7 +513,7 @@ for(const video of videos) {
                 durationId = setTimeout(() => {
                     pValue = 0
                     notifier.classList.remove('persist')
-                }, transitionTime)
+                }, notifierArrowsTransitionTime)
                 notifier.dataset.skip = pValue
                 return
             } 

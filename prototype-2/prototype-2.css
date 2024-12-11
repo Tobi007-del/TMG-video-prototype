@@ -977,29 +977,50 @@ video::-webkit-media-text-track-container {
     animation-iteration-count: infinite;
 }
 
-.notifiers-container[data-current-notifier = "fwd"] .fwd-notifier svg, 
-.notifiers-container .fwd-notifier.persist svg, 
-.notifiers-container[data-current-notifier = "bwd"] .bwd-notifier svg,
-.notifiers-container .bwd-notifier.persist svg {
-    animation-name: arrows;
+.notifiers-container[data-current-notifier = "fwd"] .fwd-notifier svg:nth-of-type(1), 
+.notifiers-container .fwd-notifier.persist svg:nth-of-type(1), 
+.notifiers-container[data-current-notifier = "bwd"] .bwd-notifier svg:nth-of-type(3),
+.notifiers-container .bwd-notifier.persist svg:nth-of-type(3) {
+    animation-name: arrow-1;
 }
 
-.fwd-notifier svg:nth-of-type(1), .bwd-notifier svg:nth-of-type(3) {
-    animation-duration: 500ms;
+.notifiers-container[data-current-notifier = "fwd"] .fwd-notifier svg:nth-of-type(2), 
+.notifiers-container .fwd-notifier.persist svg:nth-of-type(2), 
+.notifiers-container[data-current-notifier = "bwd"] .bwd-notifier svg:nth-of-type(2),
+.notifiers-container .bwd-notifier.persist svg:nth-of-type(2) {
+    animation-name: arrow-2;
 }
 
-.fwd-notifier svg:nth-of-type(2), .bwd-notifier svg:nth-of-type(2) {
-    animation-duration: 600ms;
+.notifiers-container[data-current-notifier = "fwd"] .fwd-notifier svg:nth-of-type(3), 
+.notifiers-container .fwd-notifier.persist svg:nth-of-type(3), 
+.notifiers-container[data-current-notifier = "bwd"] .bwd-notifier svg:nth-of-type(1),
+.notifiers-container .bwd-notifier.persist svg:nth-of-type(1) {
+    animation-name: arrow-3;
 }
 
-.fwd-notifier svg:nth-of-type(3), .bwd-notifier svg:nth-of-type(1) {
-    animation-duration: 700ms;
-}
-
-@keyframes arrows {
-    from {
+@keyframes arrow-1 {
+    30% {
         opacity: .25;
-    } to {
+    }
+    60% {
+        opacity: 1;
+    }
+}
+
+@keyframes arrow-2 {
+    50% {
+        opacity: .25;
+    } 
+    80% {
+        opacity: 1;
+    }
+}
+
+@keyframes arrow-3 {
+    70% {
+        opacity: .25;
+    } 
+    100% {
         opacity: 1;
     }
 }
