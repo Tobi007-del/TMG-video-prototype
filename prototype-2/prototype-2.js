@@ -1,8 +1,13 @@
+/* 
+TODO: 
+    make codebase objective
+    keyboard shortcuts shortcut
+*/
+
 //global variables
 const videos = document.getElementsByTagName("video"),
 mobileThreshold = 480
 function clamp(min, amount, max) {return Math.min(Math.max(amount, min), max)}
-
 for(const video of videos) {
     if (video.dataset.controls === "tmg-controls") {
         const videoContainer = document.createElement('div')
@@ -107,6 +112,14 @@ for(const video of videos) {
                 <path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/>
             </svg> 
         </button>
+            <button type="button" class="main-play-pause-btn" title="Play/Pause(p,l,a,y)">
+                <svg class="play-icon" data-tooltip-text="Play(k)" data-tooltip-position="top">
+                <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+            </svg>
+            <svg class="pause-icon" data-tooltip-text="Pause(k)" data-tooltip-position="top">
+                <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+            </svg>
+        </button>        
         <div class="video-controls-container">
             <div class="timeline-container" title="'>' - 5s & Shift + '>' - 10s">
                 <div class="timeline">
@@ -116,6 +129,9 @@ for(const video of videos) {
             </div>
             <div class="controls">
                 <button type="button" class="play-pause-btn" title="Play/Pause(p,l,a,y)">
+                    <svg class="replay-icon" viewBox="0 -960 960 960" data-tooltip-text="Replay" data-tooltip-position="top">
+                        <path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/>
+                    </svg> 
                     <svg class="play-icon" data-tooltip-text="Play(k)" data-tooltip-position="top">
                         <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
                     </svg>
@@ -178,17 +194,16 @@ for(const video of videos) {
         `
         // initializing video state
         videoContainer.querySelector(".video-controls-container").style.opacity = 0
+        videoContainer.querySelector(".main-play-pause-btn").style.opacity = 0
         const playNotifier = videoContainer.querySelector(".play-notifier")
         playNotifier.style.animation = "beat 1s infinite ease-out"
         video.addEventListener("timeupdate", () => {
             videoContainer.querySelector(".video-controls-container").style.opacity = ""
+            videoContainer.querySelector(".main-play-pause-btn").style.opacity = ""
             videoContainer.querySelector(".video-controls-container").style.pointerEvents = "all"
             const playNotifier = document.querySelector(".play-notifier")
             playNotifier.style.animation = ""
-            if (window.innerWidth <= mobileThreshold) {
-                playbtnPosition()
-                playNotifier.style.setProperty('display', 'none', 'important')
-            }
+            if (window.innerWidth <= mobileThreshold || window.matchMedia('(max-width: 480px), (max-width: 940px) and (orientation: landscape)').matches) playNotifier.style.setProperty('display', 'none', 'important')
         }, { once: true })
 
         const parentDiv = video.parentNode
@@ -198,6 +213,7 @@ for(const video of videos) {
         //DOM Elements
         const replayBtn = videoContainer.querySelector(".replay-btn"), 
         playPauseBtn = videoContainer.querySelector(".play-pause-btn"),
+        mainPlayPauseBtn = videoContainer.querySelector(".main-play-pause-btn"),
         theaterBtn = videoContainer.querySelector(".theater-btn"),
         fullScreenBtn = videoContainer.querySelector(".full-screen-btn"),
         pictureInPictureBtn = videoContainer.querySelector(".picture-in-picture-btn"),
@@ -251,6 +267,7 @@ for(const video of videos) {
                 notifiersContainer.dataset.currentNotifier = ''
             }
         },
+        controlsSize = () => {return Number(getComputedStyle(videoContainer).getPropertyValue("--controls-size").replace('px', ''))},
         //Intersection Observer Setup to watch the vieo
         videoObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -259,12 +276,12 @@ for(const video of videos) {
                     toggleMiniPlayerMode()
                 } else {
                     if (entry.isIntersecting) {
-                        document.addEventListener("keydown", handleSpaceBarDown)
                         document.addEventListener("keydown", handleKeyDown)
+                        document.addEventListener("keyup", handleKeyUp)
                     }
                     else {
-                        document.removeEventListener("keydown", handleSpaceBarDown)
                         document.removeEventListener("keydown", handleKeyDown)
+                        document.removeEventListener("keyup", handleKeyUp)
                     }
                 }
         })
@@ -290,7 +307,6 @@ for(const video of videos) {
 
         //Event Listeners
         //window event listeners
-        window.addEventListener('load', playbtnPosition)
         window.addEventListener('resize', handleResize)
 
         //document event listeners
@@ -299,6 +315,7 @@ for(const video of videos) {
 
         //button event listeners 
         playPauseBtn.addEventListener("click", () => togglePlay())
+        mainPlayPauseBtn.addEventListener("click", () => togglePlay())
         speedBtn.addEventListener("click", changePlaybackSpeed)
         captionsBtn.addEventListener("click", toggleCaptions)
         muteBtn.addEventListener("click", toggleMute)
@@ -325,7 +342,7 @@ for(const video of videos) {
         video.addEventListener("ended", () => videoContainer.classList.add("replay"))
         video.addEventListener("mousedown", handlePointerDown)
         video.addEventListener("touchstart", handlePointerDown, {passive: true})
-        video.addEventListener("dblclick", doubleTapHandler)
+        video.addEventListener("dblclick", handleDoubleClick)
         video.addEventListener("enterpictureinpicture", handleEnterPip)
         video.addEventListener("leavepictureinpicture", handleLeavePip)
 
@@ -336,12 +353,13 @@ for(const video of videos) {
         //volume event listeners
         volumeSlider.addEventListener("input", handleSliderInput)
         volumeSlider.parentElement.addEventListener("mousemove", handleVolumeMouseMove)
-        volumeSlider.parentElement.addEventListener("mouseup", () => {if(hoverId) clearTimeout(hoverId)})
+        volumeSlider.parentElement.addEventListener("mouseup", handleVolumeMouseUp)
+        volumeSlider.addEventListener("mousedown", () => volumeSlider.classList.add("active"))
+        volumeSlider.addEventListener("mouseup", () => volumeSlider.classList.remove("active"))
         
         //initial function calls
         controlsResize()
         volumeState()
-        playbtnPosition()
         notify.init()
 
         //resizing controls
@@ -349,34 +367,14 @@ for(const video of videos) {
             let controlsSize = 25
             svgs.forEach(svg => {
                 svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
-                if(!svg.classList.contains("settings-icon"))
-                if(!svg.classList.contains("mini-player-expand-icon"))  
-                if(!svg.classList.contains("mini-player-cancel-icon"))
-                if(!svg.classList.contains("replay-icon")) 
+                if((!svg.classList.contains("settings-icon")) && (!svg.classList.contains("mini-player-expand-icon")) && (!svg.classList.contains("mini-player-cancel-icon")) && (!svg.classList.contains("replay-icon")))
                     svg.setAttribute("viewBox", `0 0 ${controlsSize} ${controlsSize}`)
             })
-        }
-
-        //For the mobile play btn since the video height is not fixed value
-        function playbtnPosition() {
-            if (window.innerWidth <= mobileThreshold && !videoContainer.classList.contains("mini-player")) {
-                const value = Math.round((videoContainer.offsetHeight/2) - playPauseBtn.offsetHeight/2)
-                videoContainer.style.setProperty("--mobile-btn-position", `${value}px`)
-            }
-        }
-
-        function miniPlayerBtnPosition() {
-            if(videoContainer.classList.contains("mini-player")) {
-                const value = Math.round(videoContainer.offsetHeight/2 - playPauseBtn.offsetHeight/2)
-                videoContainer.style.setProperty("--mini-player-btn-position", `${value}px`)
-            }
-        }        
+        }       
 
         //window resizing
         function handleResize() {
             toggleMiniPlayerMode()
-            playbtnPosition()
-            miniPlayerBtnPosition()
         }
 
         //Play and Pause States
@@ -389,7 +387,6 @@ for(const video of videos) {
                 if (media !== e.target) media.pause()
             }
             videoContainer.classList.remove("paused")
-
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: e.currentTarget.dataset.mediaTitle,
@@ -413,9 +410,8 @@ for(const video of videos) {
         }
 
         function handleReplay() {
-            forceVideo({action: "start"})
+            forceVideoTime({action: "start"})
             video.play()
-            videoContainer.classList.remove("replay")
         }
 
         //video hover state 
@@ -431,6 +427,23 @@ for(const video of videos) {
 
         //Time Manipulation
         //Timeline
+        function forceVideoTime({action, details}) {
+            switch(action) {
+                case "moveTo":                    
+                    switch(details.to) {
+                        case "start":
+                            video.currentTime = 0
+                            break
+                        case "end":
+                            video.currentTime = video.duration
+                            break
+                        default:                        
+                            video.currentTime = (Number(details.to)/Number(details.max)) * video.duration
+                    }
+                    break
+            }
+        }
+
         function handleTimelineScrubbing(e) {
             timelineContainer.setPointerCapture(e.pointerId)
             isScrubbing = true
@@ -474,6 +487,15 @@ for(const video of videos) {
                 thumbnailImg.src = previewImgSrc
                 timelineContainer.style.setProperty("--progress-position", percent)
             }
+            let arrowPosition, arrowPositionMin = (videoContainer.classList.contains("theater") || videoContainer.classList.contains("full-screen")) && !window.matchMedia('max-width: 480px), (max-width: 940px) and (orientation: landscape)').matches ? controlsSize()/3.25 : controlsSize()/1.4 
+            if (percent < previewImgMin) {
+                arrowPosition = `${Math.max(percent * rect.width, arrowPositionMin)}px`
+            } else if (percent > (1 - previewImgMin)) {
+                arrowPosition = `${Math.min((previewImgContainer.offsetWidth/2 + (percent * rect.width) - previewImgContainer.offsetLeft), previewImgContainer.offsetWidth - arrowPositionMin - 2)}px`
+            } else {
+                arrowPosition = '50%'
+            }
+            previewImgContainer.style.setProperty("--preview-img-arrow-position", arrowPosition)
         }
     
         function handleTimeUpdate() {
@@ -494,7 +516,6 @@ for(const video of videos) {
         }
 
         //Time Skips
-        //a function for time skips
         function skip(duration, persist = false) {
             video.currentTime += duration
             const notifier = duration > 0 ? notifiersContainer.querySelector(".fwd-notifier") : notifiersContainer.querySelector(".bwd-notifier")
@@ -523,8 +544,7 @@ for(const video of videos) {
             notifier.dataset.skip = Math.abs(duration)
         }
 
-        //a fnction to handle double tap to skip
-        function doubleTapHandler(e) {
+        function handleDoubleClick(e) {
             const rect = video.getBoundingClientRect()
             if (((e.clientX-rect.left) > (video.offsetWidth*0.65))) {
                 skip(10, true)
@@ -577,41 +597,49 @@ for(const video of videos) {
         }
 
         function handleSliderInput(e) {
+            volumeHoverState()            
             video.volume = e.target.value / 100
             video.muted = e.target.value === 0
         }
                     
         function volumeState() {
-            let { min, max, value, offsetWidth } = volumeSlider
+            let { min, max, value } = volumeSlider
             value = (video.volume * 100).toFixed()
             notifiersContainer.querySelector(".volume-notifier-content").dataset.volume = value
             let volumeLevel = ""
             if (video.muted || value == 0) {
                 value = 0
                 volumeLevel = "muted"
-            } else if (value > (max/2)) {
+            } else if (value > (max/2)) 
                 volumeLevel = "high"
-            }
-            else {
+            else 
                 volumeLevel = "low"
-            }
-            let volumePosition = `${((value - min) / (max - min)) * ((offsetWidth - 5) > 0 ? (offsetWidth - 5) : 40.5)}px`
-            let volumePercent = `${((value-min) / (max - min)) * 100}%`
+            let volumePercent = (value-min) / (max - min)
+            let volumeSliderPercent = `${12 + (volumePercent * 77)}%`
             volumeSlider.value = value
             volumeSlider.dataset.volume = `${value}`
-            volumeSlider.style.setProperty("--volume-position", volumePosition)
-            volumeSlider.style.setProperty("--volume-percent", volumePercent)
+            volumeSlider.style.setProperty("--volume-slider-percent", volumeSliderPercent)
+            videoContainer.style.setProperty("--volume-percent", volumePercent)
             videoContainer.dataset.volumeLevel = volumeLevel
         }
 
         function handleVolumeMouseMove() {
+            if (hoverId) clearTimeout(hoverId)
             hoverId = setTimeout(() => {
                 if (volumeSlider.parentElement.matches(':hover')) {
                     volumeSlider.parentElement.classList.add("hover")
-                    if (restraintIdTwo) clearTimeout(restraintIdTwo)
-                    restraintIdTwo = setTimeout(() => volumeSlider.parentElement.classList.remove("hover"), restraintTime)  
+                    volumeHoverState()
                 }
             }, 250)
+        }
+
+        function volumeHoverState() {
+            if (restraintIdTwo) clearTimeout(restraintIdTwo)
+            restraintIdTwo = setTimeout(() => volumeSlider.parentElement.classList.remove("hover"), restraintTime)  
+        }
+
+        function handleVolumeMouseUp() {
+            if(hoverId) clearTimeout(hoverId)
         }
 
         //theatre mode
@@ -640,7 +668,6 @@ for(const video of videos) {
         function handleFullScreenChange() {
             videoContainer.classList.toggle("full-screen", document.fullscreenElement)            
             if(videoContainer.classList.contains("mini-player") && videoContainer.classList.contains("full-screen")) videoContainer.classList.remove("mini-player")
-            playbtnPosition()
         }        
 
         //picture-in-picture mode
@@ -678,7 +705,6 @@ for(const video of videos) {
                 videoContainer.classList.add("mini-player")
                 videoContainer.addEventListener("mousedown", moveMiniPlayer)
                 videoContainer.addEventListener("touchstart", moveMiniPlayer, {passive: false})
-                miniPlayerBtnPosition()
                 return
             } 
             if ((videoContainer.classList.contains("mini-player") && intersect) || (videoContainer.classList.contains("mini-player") && window.innerWidth < threshold)) cleanUpMiniPlayer()
@@ -691,16 +717,16 @@ for(const video of videos) {
                 videoContainer.classList.remove("mini-player")
                 videoContainer.removeEventListener("mousedown", moveMiniPlayer)
                 videoContainer.removeEventListener("touchstart", moveMiniPlayer, {passive: false})
-                playbtnPosition()
             }            
         }
         }    
 
         function moveMiniPlayer(e){
             if(videoContainer.classList.contains("mini-player")) {
-            if (!e.target.classList.contains("timeline-container") && !e.target.classList.contains("timeline") && e.target.tagName != "button") {
+            if (!e.target.classList.contains("timeline-container") && !e.target.classList.contains("timeline") && !e.target.classList.contains("timeline-container") && e.target.tagName.toLowerCase() != "button" && e.target.tagName.toLowerCase() != "input") {
                 videoContainer.addEventListener("mousemove", handleMiniPlayerPosition)
                 videoContainer.addEventListener("mouseup", emptyListeners, {once: true})
+                videoContainer.addEventListener("mouseleave", emptyListeners, {once: true})
                 videoContainer.addEventListener("touchmove", handleMiniPlayerPosition, {passive: false})
                 videoContainer.addEventListener("touchend", emptyListeners, {once: true, passive: false})
             }
@@ -710,7 +736,10 @@ for(const video of videos) {
                 videoContainer.classList.add("hover")
                 restraint()
                 videoContainer.removeEventListener("mousemove", handleMiniPlayerPosition)
+                videoContainer.removeEventListener("mouseup", emptyListeners, {once: true})
+                videoContainer.removeEventListener("mouseleave", emptyListeners, {once: true})
                 videoContainer.removeEventListener("touchmove", handleMiniPlayerPosition, {passive: false})
+                videoContainer.removeEventListener("touchend", emptyListeners, {once: true, passive: false})
             }
 
             function handleMiniPlayerPosition(e) {
@@ -731,69 +760,75 @@ for(const video of videos) {
         }        
 
         //Keyboard and General Accessibility Functions
-        function handleSpaceBarDown(e) {
-            const tagName = document.activeElement.tagName.toLowerCase()
-            if (tagName === "input") return
-
-            if (e.key === " ") {
-                if(tagName === "button") return
-                e.stopImmediatePropagation()
-                e.preventDefault()
-                scounter ++
-                if(scounter === 1) document.addEventListener("keyup", handleSpaceBarUp, {once:true})
-                if(scounter === 2) speedUp()
-            }
-
-            function handleSpaceBarUp() {
-                if (scounter === 1) {
-                    togglePlay()
-                    video.paused ? fire("videopause") : fire("videoplay") 
-                }
-                if (speedCheck && scounter > 1) slowDown()
-                scounter = 0
-            }            
-        }
-
-        function handlePointerDown() {
-            if (!videoContainer.classList.contains("mini-player")) {
-                videoContainer.addEventListener("mouseup", handlePointerUp, {once:true})
-                videoContainer.addEventListener("touchend", handlePointerUp, {once:true})
-                speedId = setTimeout(speedUp, 1000)
-                function handlePointerUp(e) {
-                    if(speedId) clearTimeout(speedId)
-                    if(speedCheck && scounter < 1) slowDown()
-                    else {
-                        const rect = video.getBoundingClientRect()
-                        if (((e.clientX-rect.left) > (video.offsetWidth*0.3)) && ((e.clientX-rect.left) < (video.offsetWidth*0.7))) {
-                            togglePlay()
-                        }          
-                    }
-                    videoContainer.removeEventListener("mouseup", handlePointerUp, {once:true})
-                    videoContainer.removeEventListener("touchend", handlePointerUp, {once:true})
-                }
-            }
-        }
-
         function handleKeyDown(e) {
             const tagName = document.activeElement.tagName.toLowerCase()
-            
+
             if(tagName === "input") return
 
             switch (e.key.toString().toLowerCase()) {
+                case " ":
+                    if(tagName === "button") return
+                    e.preventDefault()
                 case "p":
                 case "l":
                 case "a":
                 case "y":
                 case "k":
-                    togglePlay()
-                    video.paused ? fire("videopause") : fire("videoplay")
+                    scounter ++
+                    if(scounter === 1) document.addEventListener("keyup", playTriggerUp)
+                    if(scounter === 2) speedUp()
                     break
+                case "arrowleft":
+                    e.shiftKey ? skip(-10) : skip(-5)
+                    fire("bwd")
+                    break
+                case "arrowright":
+                    e.shiftKey ? skip(10) : skip(5)
+                    fire("fwd")
+                    break
+                case "arrowup":
+                    e.preventDefault()
+                    volumeChange("increment", 5)
+                    break
+                case "arrowdown":
+                    e.preventDefault()
+                    volumeChange("decrement", 5)
+                    break
+                case "home":
+                    e.preventDefault()
+                case "0":
+                    forceVideoTime({action: "moveTo", details: {to: "start"}})
+                    break
+                case "end":
+                    e.preventDefault()
+                    forceVideoTime({action: "moveTo", details: {to: "end"}})
+                    break
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                    forceVideoTime({action: "moveTo", details: {to: e.key, max: 9}})
+                    break                
+            }
+        }        
+
+        function handleKeyUp(e) {
+            const tagName = document.activeElement.tagName.toLowerCase()
+
+            if(tagName === "input") return
+
+            switch (e.key.toString().toLowerCase()) {
                 case "f":
                     toggleFullScreenMode()
                     fire("fullScreen")
                     break
                 case "t":
-                    if (window.innerWidth > mobileThreshold && !videoContainer.classList.contains(".mini-player") && !videoContainer.classList.contains("full-screen")) {
+                    if (window.innerWidth > mobileThreshold && !videoContainer.classList.contains("mini-player") && !videoContainer.classList.contains("full-screen")) {
                         toggleTheaterMode()
                         fire("theatre")
                     }
@@ -819,59 +854,54 @@ for(const video of videos) {
                     toggleCaptions()
                     fire("captions")
                     break
-                case "arrowleft":
-                    e.shiftKey ? skip(-10) : skip(-5)
-                    fire("bwd")
-                    break
-                case "arrowright":
-                    e.shiftKey ? skip(10) : skip(5)
-                    fire("fwd")
-                    break
-                case "arrowup":
-                    e.preventDefault()
-                    volumeChange("increment", 5)
-                    break
-                case "arrowdown":
-                    e.preventDefault()
-                    volumeChange("decrement", 5)
-                    break
-                case "home":
-                    e.preventDefault()
-                    forceVideo({action: "moveTo", details: {to: "start"}})
-                    break
-                case "end":
-                    e.preventDefault()
-                    forceVideo({action: "moveTo", details: {to: "end"}})
-                    break
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                case "5":
-                    forceVideo({action: "moveTo", details: {to: e.key, max: 5}})
+            }
+        }
+
+        function playTriggerUp(e) {
+            const tagName = document.activeElement.tagName.toLowerCase()
+            
+            if(tagName === "input") return
+            
+            switch (e.key.toString().toLowerCase()) {
+                case " ":
+                    if(tagName === "button") return
+                    e.preventDefault()                
+                case "p":
+                case "l":
+                case "a":
+                case "y":
+                case "k":                        
+                    e.stopImmediatePropagation()
+                    if (scounter === 1) {
+                        togglePlay()
+                        video.paused ? fire("videopause") : fire("videoplay") 
+                    }
+                    if (speedCheck && scounter > 1) slowDown()
+                    scounter = 0
                     break
             }
-        }        
+            document.removeEventListener("keyup", playTriggerUp)
+        }     
 
-        function forceVideo({action, details}) {
-            switch(action) {
-                case "moveTo":                    
-                    switch(details.to) {
-                        case "start":
-                            video.currentTime = 0
-                            break
-                        case "end":
-                            video.currentTime = video.duration
-                            break
-                        case "1":
-                        case "2":
-                        case "3":
-                        case "4":
-                        case "5": 
-                            video.currentTime = (Number(details.to)/Number(details.max)) * video.duration
-                            break
+        function handlePointerDown() {
+            if (!videoContainer.classList.contains("mini-player")) {
+                videoContainer.addEventListener("mouseup", handlePointerUp, {once:true})
+                videoContainer.addEventListener("mouseleave", handlePointerUp, {once:true})
+                videoContainer.addEventListener("touchend", handlePointerUp, {once:true})
+                speedId = setTimeout(speedUp, 1000)
+                function handlePointerUp(e) {
+                    if(speedId) clearTimeout(speedId)
+                    if(speedCheck && scounter < 1) slowDown()
+                    else {
+                        const rect = video.getBoundingClientRect()
+                        if (((e.clientX-rect.left) > (video.offsetWidth*0.3)) && ((e.clientX-rect.left) < (video.offsetWidth*0.7))) {
+                            togglePlay()
+                        }          
                     }
-                    break
+                    videoContainer.removeEventListener("mouseup", handlePointerUp, {once:true})
+                    videoContainer.removeEventListener("mouseleave", handlePointerUp, {once:true})
+                    videoContainer.removeEventListener("touchend", handlePointerUp, {once:true})
+                }
             }
         }
         
@@ -879,7 +909,7 @@ for(const video of videos) {
             const n = value / 100
             switch(type) {
                 case "increment":
-                    if ((video.volume*100).toFixed() == 95) {
+                    if ((video.volume*100).toFixed() == 100-value) {
                         video.volume = 1
                         fire("volumeup")
                         break
@@ -888,7 +918,7 @@ for(const video of videos) {
                     fire("volumeup")
                     break
                 case "decrement":
-                    if(video.volume == 0 || (video.volume*100).toFixed() == 5) {
+                    if(video.volume == 0 || (video.volume*100).toFixed() == value) {
                         video.volume = 0
                         fire("volumemuted")
                         break
