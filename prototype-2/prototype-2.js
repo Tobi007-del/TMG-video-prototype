@@ -585,8 +585,9 @@ for(const video of videos) {
         }
 
         //Captions
-        captions.mode = "hidden"
+        if(captions) captions.mode = "hidden" 
         function toggleCaptions() {
+            if(!captions) return
             const isHidden = captions.mode === "hidden"
             captions.mode = isHidden ? "showing" : "hidden"
             videoContainer.classList.toggle("captions", isHidden)
