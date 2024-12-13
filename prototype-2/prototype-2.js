@@ -6,7 +6,8 @@ TODO:
 
 //global variables
 const videos = document.getElementsByTagName("video"),
-mobileThreshold = 480
+mobileThreshold = 480,
+mobileMediaQuery = () => {return window.matchMedia('(max-width: 480px), (max-width: 940px) and (max-height: 480px) and (orientation: landscape)').matches}
 function clamp(min, amount, max) {return Math.min(Math.max(amount, min), max)}
 for(const video of videos) {
     if (video.dataset.controls === "tmg-controls") {
@@ -203,7 +204,7 @@ for(const video of videos) {
             videoContainer.querySelector(".video-controls-container").style.pointerEvents = "all"
             const playNotifier = document.querySelector(".play-notifier")
             playNotifier.style.animation = ""
-            if (window.innerWidth <= mobileThreshold || window.matchMedia('(max-width: 480px), (max-width: 940px) and (orientation: landscape)').matches) playNotifier.style.setProperty('display', 'none', 'important')
+            if (mobileMediaQuery()) playNotifier.style.setProperty('display', 'none', 'important')
         }, { once: true })
 
         const parentDiv = video.parentNode
@@ -487,7 +488,7 @@ for(const video of videos) {
                 thumbnailImg.src = previewImgSrc
                 timelineContainer.style.setProperty("--progress-position", percent)
             }
-            let arrowPosition, arrowPositionMin = (videoContainer.classList.contains("theater") || videoContainer.classList.contains("full-screen")) && !window.matchMedia('max-width: 480px), (max-width: 940px) and (orientation: landscape)').matches ? controlsSize()/3.25 : controlsSize()/1.4 
+            let arrowPosition, arrowPositionMin = (videoContainer.classList.contains("theater") || videoContainer.classList.contains("full-screen")) && !mobileMediaQuery() ? controlsSize()/3.25 : controlsSize()/1.4 
             if (percent < previewImgMin) {
                 arrowPosition = `${Math.max(percent * rect.width, arrowPositionMin)}px`
             } else if (percent > (1 - previewImgMin)) {
@@ -526,7 +527,7 @@ for(const video of videos) {
                 }
                 currentNotifier = notifier
                 notifier.classList.add('persist')
-                pValue += Math.abs(duration)
+                pValue += duration
                 if ((video.currentTime === 0 && notifier.classList.contains("bwd-notifier")) || (video.currentTime === video.duration && notifier.classList.contains("fwd-notifier"))) {
                     pValue = 0
                 }
@@ -828,7 +829,7 @@ for(const video of videos) {
                     fire("fullScreen")
                     break
                 case "t":
-                    if (window.innerWidth > mobileThreshold && !videoContainer.classList.contains("mini-player") && !videoContainer.classList.contains("full-screen")) {
+                    if (!mobileMediaQuery() && !videoContainer.classList.contains("mini-player") && !videoContainer.classList.contains("full-screen")) {
                         toggleTheaterMode()
                         fire("theatre")
                     }
