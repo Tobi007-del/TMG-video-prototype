@@ -389,13 +389,14 @@ for(const video of videos) {
             }
             videoContainer.classList.remove("paused")
             if ('mediaSession' in navigator) {
+                if (e.currentTarget.dataset.mediaTitle && e.currentTarget.dataset.mediaArtwork) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: e.currentTarget.dataset.mediaTitle,
                     artwork: [
                         {src: e.currentTarget.dataset.mediaArtwork}
                     ]
                 })
-    
+                }
                 navigator.mediaSession.setActionHandler('play', () => togglePlay(true))
                 navigator.mediaSession.setActionHandler('pause', () => togglePlay(false))
                 navigator.mediaSession.setActionHandler('seekbackward', () => skip(-10))
@@ -585,7 +586,7 @@ for(const video of videos) {
         }
 
         //Captions
-        if(captions) captions.mode = "hidden" 
+        captions ? captions.mode = "hidden" : captionsBtn.classList.add("hidden")
         function toggleCaptions() {
             if(!captions) return
             const isHidden = captions.mode === "hidden"
