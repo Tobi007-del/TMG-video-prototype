@@ -96,7 +96,6 @@ video {
 }
 
 .video-container {
-    min-height: 200px!important;
     position: relative;
     width: 90dvw;
     max-width: 700px;
@@ -113,7 +112,7 @@ video {
 
 .video-container *,
 .video-container *::after, 
-.video-conainer *::before {
+.video-container *::before {
     box-sizing: border-box;
     font-family: var(--font-family);
     font-kerning: normal;

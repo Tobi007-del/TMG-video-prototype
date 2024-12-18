@@ -373,6 +373,7 @@ function launchVideoController(video, videoSettings) {
     speedToken,
     speedTimeoutId,
     speedIntervalId,
+    rewindVideoTime,
     speedPosition,
     skipDurationId = null,
     skipDuration = 0,
@@ -677,14 +678,21 @@ function launchVideoController(video, videoSettings) {
             speedNotifier.classList.add("rewind")
             video.addEventListener("play", rewindReset)
             video.addEventListener("pause", rewindReset)
-            speedIntervalId = setInterval(() => video.currentTime -= 0.04, 20)
-        }
+            rewindVideoTime = video.currentTime
+            speedIntervalId = setInterval(rewindVideo, 20)
+        }        
         speedNotifier.classList.add("active")
         videoContainer.classList.add("movement")
     }
 
+    function rewindVideo() {
+        rewindVideoTime -= .04
+        timelineContainer.style.setProperty("--progress-position",  rewindVideoTime/video.duration)
+        video.currentTime -= .04
+    }
+
     function rewindReset() {
-        if (speedToken === 0) video.paused ? clearInterval(speedIntervalId) : speedIntervalId = setInterval(() => video.currentTime -= 0.04, 20)
+        video.paused ? clearInterval(speedIntervalId) : speedIntervalId = setInterval(rewindVideo, 20)
     }
     
     function slowDown() {
