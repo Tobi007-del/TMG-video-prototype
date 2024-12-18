@@ -479,7 +479,7 @@ function launchVideoController(video, videoSettings) {
 
     //resizing controls
     function controlsResize() {           
-        let controlsSize = getControlsSize() ?? 25
+        let controlsSize = 25
         svgs.forEach(svg => {
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
             if ((!svg.classList.contains("settings-icon")) && (!svg.classList.contains("mini-player-expand-icon")) && (!svg.classList.contains("mini-player-cancel-icon")) && (!svg.classList.contains("replay-icon")))
