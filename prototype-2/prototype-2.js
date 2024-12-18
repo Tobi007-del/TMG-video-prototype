@@ -808,7 +808,7 @@ function launchVideoController(video, videoSettings) {
                     .then(() => console.log('Video was changed to fullscreen so orientation was locked to landscape.'))
                     .catch(error => console.error('Failed to lock orientation:', error))
                 }  
-                document.requestFullscreen()
+                videoContainer.requestFullscreen()
             } else {
                 if (screen.orientation && screen.orientation.lock)
                     screen.orientation.unlock()
