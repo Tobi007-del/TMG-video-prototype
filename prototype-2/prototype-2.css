@@ -818,7 +818,7 @@ video::-webkit-media-text-track-container {
     border-color: var(--border-color);
     display: none;
     z-index: 2;
-    background: var(--darker-brand-accent-color);
+    background: var(--current-theme-inverse-color);
     pointer-events: none;
 }
 
