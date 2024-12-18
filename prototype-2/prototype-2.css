@@ -5,6 +5,7 @@ html {
 
 body {
     margin: 0;
+    min-height: 300vh;
 }
 
 .container {
@@ -87,7 +88,7 @@ video {
     --timeline-preview-color: rgb(150,150,150);
     --volume-slider-color: var(--current-theme-fade-color);
     --volume-slider-complement-color: rgba(100,100,100,0.75);
-    --loader-size: 20%;
+    --loader-size: 80px;
     --loader-width: calc(var(--controls-size)/3);
     --loader-color: var(--brand-color);
     --loader-complement-color: var(--current-theme-inverse-accent-color);
@@ -146,8 +147,6 @@ video {
 
 .video-container > img {
     color: transparent;
-    min-width: 100%;
-    min-height: 100%;
     background: center/cover no-repeat url('../assets/icons/movie-tape.png'), black!important;
 }
 
@@ -359,7 +358,6 @@ video {
 }
 
 .video-container.mini-player .video-buffer {
-    --loader-size: 40%;
     --loader-width: calc(var(--controls-size)/2);
 }
 
@@ -1172,6 +1170,7 @@ video::-webkit-media-text-track-container {
 @media(max-width: 780px) {
     .video-container .video-buffer {
         --loader-width: calc(var(--controls-size)/3.5);
+        --loader-size: 65px;
     }
     .notifiers {
         --controls-size: 30px;
@@ -1199,9 +1198,13 @@ video::-webkit-media-text-track-container {
 }
 
 @media (max-width: 480px), (max-width: 940px) and (max-height: 480px) and (orientation: landscape) {
+    .video-container .video-buffer {
+        --loader-width: calc(var(--controls-size)/3.5);
+        --loader-size: 55px;
+    }
     .video-container.scrubbing, 
     .video-container.hover:hover:has(.timeline-container:hover) {
-        --neutral-darker-curtain-color:     transparent!important;
+        --neutral-darker-curtain-color: transparent!important;
     }
     .video-container .replay-btn,
     .video-container .main-play-pause-btn, 
@@ -1213,6 +1216,10 @@ video::-webkit-media-text-track-container {
         aspect-ratio: 1 / 1;
         background: var(--neutral-darker-curtain-color);
         opacity: .75;
+    }
+    .video-container.full-screen .video-controls-container::before {
+        aspect-ratio: unset;
+        height: 100vh;
     }
     .theater-btn,
     .video-container .play-notifier,
@@ -1288,10 +1295,6 @@ video::-webkit-media-text-track-container {
 }
 
 @media (max-width: 480px) {
-    .video-container .video-buffer {
-        --loader-size: 22.5%;
-        --loader-width: calc(var(--controls-size)/3.5);
-    }
     .video-container, 
     .video-container.full-screen, 
     .notifiers {
