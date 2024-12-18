@@ -1,0 +1,16 @@
+{
+"activated": true, 
+"initialState": true, 
+"previewImages": {
+    "address": "../assets/previewImgs/preview$.jpg", 
+    "fps": 10
+}, 
+"media": {
+    "title": "Justice League Teaser", 
+    "artwork": [
+        {
+            "src": "../assets/justice-league-b-s.jpeg"
+        }
+    ]
+}
+}
