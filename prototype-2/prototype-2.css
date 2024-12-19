@@ -76,7 +76,7 @@ video {
     --brand-color : rgb(226,110,2);
     --lighter-brand-color : rgb(255,187,123);
     --darker-brand-accent-color: rgb(from var(--brand-color) r g b/.5);
-    --neutral-darker-background-color: rgba(0,0,0,.85);
+    --neutral-darker-background-color: rgba(0,0,0,.65);
     --neutral-darker-curtain-color: transparent;
     --current-theme-color: white;
     --current-theme-fade-color: whitesmoke;
@@ -89,7 +89,7 @@ video {
     --volume-slider-color: var(--current-theme-fade-color);
     --volume-slider-complement-color: rgba(100,100,100,0.75);
     --loader-size: 80px;
-    --loader-width: calc(var(--controls-size)/3);
+    --loader-width: calc(var(--controls-size)/3.5);
     --loader-color: var(--brand-color);
     --loader-complement-color: var(--current-theme-inverse-accent-color);
     --clover-loader-url: url('../assets/icons/two-balls-white.gif');
@@ -358,7 +358,7 @@ video {
 }
 
 .video-container.mini-player .video-buffer {
-    --loader-width: calc(var(--controls-size)/2);
+    --loader-width: calc(var(--controls-size)/3);
 }
 
 .video-container.mini-player .volume-slider::after {
@@ -401,6 +401,8 @@ video {
     aspect-ratio: 1 / 1;
     border: var(--loader-width) solid var(--loader-complement-color);
     border-top: var(--loader-width) solid var(--loader-color);
+    border-right: var(--loader-width) solid var(--loader-color);
+    border-left: var(--loader-width) solid var(--loader-color);
     opacity: .85;
     border-radius: 50%;
     animation: spin 2s linear infinite;
@@ -428,6 +430,7 @@ video {
     aspect-ratio: 6 / 1;
     z-index: -1;
     pointer-events: none;
+    transition: background-color 400ms ease;
 }
 
 .video-container.hover:hover, 
@@ -816,7 +819,7 @@ video::-webkit-media-text-track-container {
     border-color: var(--border-color);
     display: none;
     z-index: 2;
-    background: var(--darker-brand-accent-color);
+    background: var(--current-theme-inverse-color);
     pointer-events: none;
 }
 
@@ -1154,6 +1157,7 @@ video::-webkit-media-text-track-container {
         height: calc(var(--controls-size)*1.05);
         border: none;
         border-radius: var(--controls-size)!important;
+        background: var(--darker-brand-accent-color);
     }
     .video-container.mini-player .preview-img-container::after {
         align-items: center;
@@ -1169,7 +1173,7 @@ video::-webkit-media-text-track-container {
 
 @media(max-width: 780px) {
     .video-container .video-buffer {
-        --loader-width: calc(var(--controls-size)/3.5);
+        --loader-width: calc(var(--controls-size)/4);
         --loader-size: 65px;
     }
     .notifiers {
@@ -1199,8 +1203,8 @@ video::-webkit-media-text-track-container {
 
 @media (max-width: 480px), (max-width: 940px) and (max-height: 480px) and (orientation: landscape) {
     .video-container .video-buffer {
-        --loader-width: calc(var(--controls-size)/3.5);
-        --loader-size: 55px;
+        --loader-width: calc(var(--controls-size)/7.5);
+        --loader-size: 35px;
     }
     .video-container.scrubbing, 
     .video-container.hover:hover:has(.timeline-container:hover) {
@@ -1258,6 +1262,7 @@ video::-webkit-media-text-track-container {
         height: calc(var(--controls-size)*1.05);
         border: none;
         border-radius: var(--controls-size)!important;
+        background: var(--darker-brand-accent-color);
     }
     .video-container .preview-img-container::after {
         align-items: center;
