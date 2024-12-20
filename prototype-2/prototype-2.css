@@ -14,8 +14,16 @@ body {
 }
 
 /* setting video initial state begins*/
-body .video-container.initial > *:not(video, .notifiers-container) {
+body .video-container.initial .video-controls-container,
+body .video-container.initial .video-overlay-controls-container > *:not(.notifiers-container),
+body .video-container:has(.play-notifier.spin) .video-controls-container,
+body .video-container:has(.play-notifier.spin) .video-overlay-controls-containr > *:not(.notifiers-container) {
     opacity: 0!important;
+}
+
+body .video-container.initial .video-overlay-controls-container,
+body .video-container:has(.play-notifier.spin) .video-overlay-controls-container {
+    background-color: transparent!important;
 }
 
 body .video-container.initial > *:not(.notifiers-container) {
@@ -27,15 +35,15 @@ body .video-container.initial .play-notifier {
     pointer-events: all!important;
 }
 
-body .video-container.initial .notifiers-container {
+body .video-container.initial .notifiers-container, body .video-container:has(.play-notifier.spin) .notifiers-container {
     z-index: 100!important;
 }
 
-body .video-container.initial .notifiers:not(.play-notifier) {
+body .video-container.initial .notifiers:not(.play-notifier), body .video-container:has(.play-notifier.spin) .notifiers:not(.play-notifier) {
     display: none!important;
 }
 
-body .video-container.initial .play-notifier {
+body .video-container.initial .play-notifier, .video-container .play-notifier.spin {
     display: flex!important;
     animation: beat 1s infinite ease-out!important;
 }
@@ -49,11 +57,16 @@ body .video-container.initial .play-notifier {
     }    
 }
 
-body .video-container.initial .play-notifier:hover {
+body .video-container.initial .play-notifier:hover, body .video-container .play-notifier.spin {
     cursor: pointer!important;
     transition: all 500ms ease!important;
     opacity: 1!important;
     transform: scale(1.5)!important;
+}
+body .video-container.initial .play-notifier:hover {
+    animation: none!important;
+}
+body .video-container .play-notifier.spin {
     animation: spin 1s ease-out!important;
 }
 @keyframes spin {
@@ -76,7 +89,7 @@ video {
     --brand-color : rgb(226,110,2);
     --lighter-brand-color : rgb(255,187,123);
     --darker-brand-accent-color: rgb(from var(--brand-color) r g b/.5);
-    --neutral-darker-background-color: rgba(0,0,0,.65);
+    --neutral-darker-background-color: rgba(0,0,0,.5);
     --neutral-darker-curtain-color: transparent;
     --current-theme-color: white;
     --current-theme-fade-color: whitesmoke;
@@ -109,6 +122,17 @@ video {
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
+}
+
+.video-overlay-controls-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: transparent;
+}
+
+.video-overlay-controls-container > * {
+    z-index: 1;
 }
 
 .video-container *,
@@ -183,7 +207,6 @@ video {
     align-items: center;
     border-radius: 50%;
     background: var(--darker-brand-accent-color);
-    z-index: 1;
     transition: none;
 }
 
@@ -194,7 +217,7 @@ video {
 }
 
 .main-play-pause-btn svg {
-    transform: scale(2);
+    transform: scale(1.5);
 }
 
 .replay-btn {
@@ -218,7 +241,7 @@ video {
     position: fixed;
     right: var(--mouse-x);
     bottom: var(--mouse-y);
-    z-index: 5;
+    z-index: 500000;
     min-height: 150px;
     width: clamp(5rem, 50dvw, 400px)!important;
     border-radius: calc(var(--controls-size)/1.5)!important;
@@ -231,6 +254,11 @@ video {
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+.video-container.mini-player .video-overlay-controls-container {
+    background-color: var(--neutral-darker-curtain-color);
+    transition: opacity 150ms ease-in-out;
 }
 
 .video-container.mini-player .video-buffer {
@@ -257,7 +285,6 @@ video {
     opacity: 0;
     color: var(--current-theme-color);
     top: 0;
-    z-index: 2;
 }
 
 .video-container.mini-player .mini-player-expand-btn-wrapper {  
@@ -279,24 +306,12 @@ video {
     height: calc(var(--controls-size)*2.5);
 }
 
-.video-container.mini-player .replay-btn, .video-container.mini-player .main-play-pause-btn,
-.video-container.mini-player.buffer .video-buffer,
-.video-container.mini-player .notifiers {
-    z-index: 2;
-}
-
 .video-container.mini-player .replay-btn svg {
     transform: scale(1.75);
 }
 
 .video-container.mini-player .main-play-pause-btn {
     display: flex;
-}
-
-.video-container.mini-player .video-controls-container::before {
-    aspect-ratio: 1 / 1;
-    background: var(--neutral-darker-curtain-color);
-    opacity: .75;
 }
 
 .video-container.mini-player.scrubbing, 
@@ -414,7 +429,6 @@ video {
     left: 0;
     right: 0;
     z-index: 1;
-    transition: opacity 150ms ease-in-out;
 }
 
 .video-controls-container > *:not(.timeline-container) {
@@ -469,7 +483,7 @@ video {
     opacity: 0!important;
 }
 
-.video-container.movement .video-controls-container::before {
+.video-container.movement {
     --neutral-darker-curtain-color: transparent!important;
 }
 
@@ -808,6 +822,7 @@ video::-webkit-media-text-track-container {
 .preview-img-container {
     --border-color: var(--current-theme-fade-color);
     position: absolute;
+    display: none;
     height: calc(var(--controls-size)*5);
     max-width: 40dvw;
     aspect-ratio: 16 / 9;
@@ -817,8 +832,6 @@ video::-webkit-media-text-track-container {
     border-radius: calc(var(--controls-size)/1.85);
     border: calc(var(--controls-size)/15) solid;
     border-color: var(--border-color);
-    display: none;
-    z-index: 2;
     background: var(--current-theme-inverse-color);
     pointer-events: none;
 }
@@ -1210,20 +1223,9 @@ video::-webkit-media-text-track-container {
     .video-container.hover:hover:has(.timeline-container:hover) {
         --neutral-darker-curtain-color: transparent!important;
     }
-    .video-container .replay-btn,
-    .video-container .main-play-pause-btn, 
-    .video-container.buffer .video-buffer, 
-    .video-container .notifiers {
-        z-index: 2;
-    }
-    .video-controls-container::before {
-        aspect-ratio: 1 / 1;
-        background: var(--neutral-darker-curtain-color);
-        opacity: .75;
-    }
-    .video-container.full-screen .video-controls-container::before {
-        aspect-ratio: unset;
-        height: 100vh;
+    .video-container .video-overlay-controls-container {
+        background-color: var(--neutral-darker-curtain-color);
+        transition: opacity 150ms ease-in-out;      
     }
     .theater-btn,
     .video-container .play-notifier,
@@ -1242,7 +1244,7 @@ video::-webkit-media-text-track-container {
         height: calc(var(--controls-size)*2.5);
     }
     .replay-btn svg {
-        transform: scale(1.85);        
+        transform: scale(1.5);        
     }
     .video-container .main-play-pause-btn {
         display: flex;

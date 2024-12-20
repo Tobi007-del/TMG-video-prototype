@@ -54,9 +54,12 @@ function deployControls(medium) {
                 console.log(`${mssg} Please provide a valid JSON file`)
                 fetchedControls = undefined
             })
-        } 
+        } else if(v.tmgControls) {
+            console.error("File type must be in the '.json' format for TMG to read the custom settings")
+        }
         (async function buildControlOptions() {
-            const customControls = await fetchedControls ??  {} 
+            await fetchedControls
+            const customControls = fetchedControls ??  {} 
             if (!fetchedControls) {
                 if (v.tmgActivated) customControls.activated = JSON.parse(v.tmgActivated)
                 if (v.tmgInitialState) customControls.initialState = JSON.parse(v.tmgInitialState)
@@ -82,7 +85,7 @@ function deployControls(medium) {
                     }
                 }
             }
-            videoSettings = {...DEFAULT_SETTINGS, ...customControls}
+            videoSettings = customControls && Object.keys(customControls).length > 0 ? {...DEFAULT_SETTINGS, ...customControls} : DEFAULT_SETTINGS 
             if (medium.tmgcontrols ?? true) {
                 launchVideoController(medium, videoSettings)
             } else {
@@ -105,6 +108,8 @@ function launchVideoController(video, videoSettings) {
     video.poster = videoSettings.initialState ? videoSettings.media.artwork[0].src : ""
     videoContainer.innerHTML = 
     `
+    <!-- Code injected by TMG -->
+    <div class="video-overlay-controls-container">
     <img class="thumbnail-img" alt="movie-image" src="${DEFAULT_SETTINGS.media.artwork[0].src}">
     <div class="notifiers-container" data-current-notifier="">
         <div class="notifiers play-notifier">
@@ -206,6 +211,7 @@ function launchVideoController(video, videoSettings) {
             <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
         </svg>
     </button>        
+    </div>
     <div class="video-controls-container">
         <div class="timeline-container" title="'>' - 5s & Shift + '>' - 10s">
             <div class="timeline">
@@ -277,6 +283,7 @@ function launchVideoController(video, videoSettings) {
             </button>
         </div>
     </div>
+    <!-- Code injected by TMG ends -->
     `
 
     const parentDiv = video.parentNode
@@ -368,7 +375,8 @@ function launchVideoController(video, videoSettings) {
     hoverId,
     restraintId,
     restraintIdTwo, 
-    scounter = 0, 
+    smCounter = 0, 
+    smCheck = false,
     speedCheck = false, 
     speedToken,
     speedTimeoutId,
@@ -386,7 +394,7 @@ function launchVideoController(video, videoSettings) {
     //initializing video state
     if (videoSettings.activated) {
         if (videoSettings.initialState) {
-            notifiersContainer.onclick = () => togglePlay(true)
+            notifiersContainer.addEventListener("click", () => togglePlay(true), {once:true})
             video.addEventListener("timeupdate", initializeVideoControls, {once:true})
         } else initializeVideoControls()        
     } else {
@@ -395,11 +403,10 @@ function launchVideoController(video, videoSettings) {
     }
 
     function initializeVideoControls() {
-        videoContainer.querySelector(".total-time").textContent = formatDuration(video.duration)
+        setInitialStates()
         videoObserver.observe(videoContainer.parentElement)
         videoObserver.observe(video)      
         setEventListeners()
-        setInitialStates()
     }
 
     function setEventListeners() {
@@ -423,7 +430,7 @@ function launchVideoController(video, videoSettings) {
         video.addEventListener("loadeddata", () => totalTimeElem.textContent = formatDuration(video.duration))
         video.addEventListener("ended", () => videoContainer.classList.add("replay"))
         video.addEventListener("mousedown", handlePointerDown)
-        video.addEventListener("touchstart", handlePointerDown, {passive: true})
+        video.addEventListener("touchstart", handlePointerDown, {passive:true})
         video.addEventListener("click", handleClick)
         video.addEventListener("dblclick", handleDoubleClick)
         video.addEventListener("enterpictureinpicture", handleEnterPip)
@@ -465,12 +472,23 @@ function launchVideoController(video, videoSettings) {
     }
 
     function setInitialStates() {
+        videoContainer.querySelector(".total-time").textContent = formatDuration(video.duration)
         volumeState()
-        captions ? captions.mode = "hidden" : captionsBtn.classList.add("hidden")
+        if(captions) { 
+            captions.mode = "hidden"
+        } else {
+            captionsBtn.classList.add("hidden")
+            const n = events.findIndex(e => e === "captions")
+            events.splice(n, 1)
+        }
         if (videoSettings.initialState) {
+            const playNotifier = notifiersContainer.querySelector(".play-notifier")
+            playNotifier.classList.add("spin")
+            playNotifier.addEventListener("animationend", () => {
+                playNotifier.classList.remove("spin")
+            }, {once: true})
             if (!video.autoplay) handlePlay()
             videoContainer.classList.remove("initial")
-            notifiersContainer.onclick = null
         }
     }
 
@@ -660,29 +678,31 @@ function launchVideoController(video, videoSettings) {
     }
     
     function speedUp(x) {
-        const rect = video.getBoundingClientRect()
-        speedCheck = true
-        wasPaused = video.paused
-        if (wasPaused) togglePlay(true)
-        if (x) {
-            x - rect.left >= video.offsetWidth*0.5 ? fastForward() : rewind()
-        } else fastForward()
-        function fastForward() {
-            speedToken = 1
-            previousRate = video.playbackRate
-            video.playbackRate = 2    
+        if (!speedCheck) {
+            const rect = video.getBoundingClientRect()
+            speedCheck = true
+            wasPaused = video.paused
+            if (wasPaused) togglePlay(true)
+            if (x) {
+                x - rect.left >= video.offsetWidth*0.5 ? fastForward() : rewind()
+            } else fastForward()
+            function fastForward() {
+                speedToken = 1
+                previousRate = video.playbackRate
+                video.playbackRate = 2    
+            }
+            function rewind() {
+                speedToken = 0
+                notifiersContainer.querySelector(".speed-notifier").textContent = '2x'
+                speedNotifier.classList.add("rewind")
+                video.addEventListener("play", rewindReset)
+                video.addEventListener("pause", rewindReset)
+                rewindVideoTime = video.currentTime
+                speedIntervalId = setInterval(rewindVideo, 20)
+            }        
+            speedNotifier.classList.add("active")
+            videoContainer.classList.add("movement")
         }
-        function rewind() {
-            speedToken = 0
-            notifiersContainer.querySelector(".speed-notifier").textContent = '2x'
-            speedNotifier.classList.add("rewind")
-            video.addEventListener("play", rewindReset)
-            video.addEventListener("pause", rewindReset)
-            rewindVideoTime = video.currentTime
-            speedIntervalId = setInterval(rewindVideo, 20)
-        }        
-        speedNotifier.classList.add("active")
-        videoContainer.classList.add("movement")
     }
 
     function rewindVideo() {
@@ -696,19 +716,21 @@ function launchVideoController(video, videoSettings) {
     }
     
     function slowDown() {
-        speedCheck = false
-        if (wasPaused) togglePlay(false)
-        if (speedToken === 1) {
-            video.playbackRate = previousRate
-        } else if (speedToken === 0) {
-            notifiersContainer.querySelector(".speed-notifier").textContent = `${previousRate}x`
-            speedNotifier.classList.remove("rewind")
-            video.removeEventListener("play", rewindReset)
-            video.removeEventListener("pause", rewindReset)
-            if (speedIntervalId) clearInterval(speedIntervalId)
+        if (speedCheck) {
+            speedCheck = false
+            if (wasPaused) togglePlay(false)
+            if (speedToken === 1) {
+                video.playbackRate = previousRate
+            } else if (speedToken === 0) {
+                notifiersContainer.querySelector(".speed-notifier").textContent = `${previousRate}x`
+                speedNotifier.classList.remove("rewind")
+                video.removeEventListener("play", rewindReset)
+                video.removeEventListener("pause", rewindReset)
+                if (speedIntervalId) clearInterval(speedIntervalId)
+            }
+            speedNotifier.classList.remove("active")
+            videoContainer.classList.remove('movement')
         }
-        speedNotifier.classList.remove("active")
-        videoContainer.classList.remove('movement')
     }
 
     //Captions
@@ -915,7 +937,7 @@ function launchVideoController(video, videoSettings) {
     function handleClick() {
         if (playId) clearTimeout(playId)
         playId = setTimeout(() => {
-            if (!(speedCheck && scounter < 1))  togglePlay()
+            if (!(speedCheck && smCounter < 1))  togglePlay()
             handleMouseMove()
         }, 300)
     }
@@ -949,9 +971,9 @@ function launchVideoController(video, videoSettings) {
             case "a":
             case "y":
             case "k":
-                scounter ++
-                if (scounter === 1) document.addEventListener("keyup", playTriggerUp)
-                if (scounter === 2) speedUp()
+                smCounter ++
+                if (smCounter === 1) document.addEventListener("keyup", playTriggerUp)
+                if (smCounter === 2 && !smCheck) speedUp()
                 break
             case "arrowleft":
                 e.shiftKey ? skip(-10) : skip(-5)
@@ -1047,13 +1069,13 @@ function launchVideoController(video, videoSettings) {
             case "y":
             case "k":                        
                 e.stopImmediatePropagation()
-                if (scounter === 1) {
+                if (smCounter === 1) {
                     togglePlay()
                     video.paused ? fire("videopause") : fire("videoplay") 
                 }
-                if (speedCheck && scounter > 1) slowDown()
-                scounter = 0
-                break
+            default:
+                if (speedCheck && smCounter > 1 && !smCheck) slowDown()
+                smCounter = 0
         }
         document.removeEventListener("keyup", playTriggerUp)
     }     
@@ -1065,6 +1087,7 @@ function launchVideoController(video, videoSettings) {
             videoContainer.addEventListener("mouseleave", handlePointerUp)                
             videoContainer.addEventListener("touchmove", handlePointerMove, {passive: true})
             videoContainer.addEventListener("touchend", handlePointerUp)
+            smCheck = true
             const x = e.clientX ?? e.changedTouches[0].clientX
             speedTimeoutId = setTimeout(speedUp, 1000, x)
             const rect = video.getBoundingClientRect()
@@ -1078,14 +1101,15 @@ function launchVideoController(video, videoSettings) {
                     setTimeout(speedUp, 0, x)
                 }
             }
-            function handlePointerUp(e) {
+            function handlePointerUp() {
                 videoContainer.removeEventListener("mousemove", handlePointerMove)
                 videoContainer.removeEventListener("mouseup", handlePointerUp)
                 videoContainer.removeEventListener("mouseleave", handlePointerUp)                    
                 videoContainer.removeEventListener("touchmove", handlePointerMove, {passive: true})
                 videoContainer.removeEventListener("touchend", handlePointerUp)
+                smCheck = false
                 if (speedTimeoutId) clearTimeout(speedTimeoutId)
-                if (speedCheck && scounter < 1) slowDown()                        
+                if (speedCheck && smCounter < 1) slowDown()                        
             }
         }
     }    
