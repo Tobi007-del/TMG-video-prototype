@@ -19,6 +19,8 @@ const DEFAULT_SETTINGS = {
     activated: true,
     initialMode: "normal",
     initialState: true,
+    progressBar: false,
+    beta: false,
     playbackState: null,
 },
 media = document.querySelectorAll("[tmgcontrols]"),
@@ -46,57 +48,82 @@ function deployControls(medium) {
         v = medium.dataset
         //building controls object
         let fetchedControls, videoSettings
-        if (v.tmgControls?.includes('.json')) {
-            fetchedControls = fetch(v.tmgControls.toString()).then(res => {
+        if (v.tmg?.includes('.json')) {
+            fetchedControls = fetch(v.tmg.toString()).then(res => {
                 if (!res.ok) throw new Error(`TMG could not find JSON file!. Status: ${res.status}`)
                 return res.json()
             }).catch(({message: mssg}) => {
-                console.log(`${mssg} Please provide a valid JSON file`)
+                console.error(`${mssg} Please provide a valid JSON file`)
                 fetchedControls = undefined
             })
-        } else if(v.tmgControls) {
+        } else if(v.tmg) {
             console.error("File type must be in the '.json' format for TMG to read the custom settings")
         }
-        (async function buildControlOptions() {
-            await fetchedControls
-            const customControls = fetchedControls ??  {} 
-            if (!fetchedControls) {
-                if (v.tmgActivated) customControls.activated = JSON.parse(v.tmgActivated)
-                if (v.tmgInitialState) customControls.initialState = JSON.parse(v.tmgInitialState)
-                if (v.tmgInitialMode) customControls.initialMode = v.tmgInitialMode
+        (async function buildControlOptions(v) {
+            const customControls = await fetchedControls ??  {} 
+            let bool = () => {return JSON.stringify(customControls) === "{}"}
+            if (bool()) {
+                if (v.tmgActivated) {
+                    customControls.activated = JSON.parse(v.tmgActivated)
+                    medium.removeAttribute("data-tmg-activated")
+                }
+                if (v.tmgInitialState) {
+                    customControls.initialState = JSON.parse(v.tmgInitialState)
+                    medium.removeAttribute("data-tmg-initial-state")
+                }
+                if (v.tmgInitialMode) {
+                    customControls.initialMode = v.tmgInitialMode
+                    medium.removeAttribute("data-tmg-initial-mode")
+                }
+                if (v.tmgProgressBar) {
+                    customControls.progressBar =  JSON.parse(v.tmgProgressBar)
+                    medium.removeAttribute("data-tmg-progress-bar")
+                }
+                if (v.tmgBeta) {
+                    customControls.beta = JSON.parse(v.tmgBeta)
+                    medium.removeAttribute("data-tmg-beta")
+                }
                 if (v.tmgPreviewImagesAddress) {
                     customControls.previewImages ? customControls.previewImages.address = v.tmgPreviewImagesAddress : customControls.previewImages = {
                         address: v.tmgPreviewImagesAddress
                     }
+                    medium.removeAttribute("data-tmg-preview-images-address")
                 }
                 if (v.tmgPreviewImagesFps) {
                     customControls.previewImages ? customControls.previewImages.fps = v.tmgPreviewImagesFps : customControls.previewImages = {
                         fps: Number(v.tmgPreviewImagesFps)
                     }
+                    medium.removeAttribute("data-tmg-preview-images-fps")
                 } 
                 if (v.tmgMediaTitle ?? medium.title) {
                     customControls.media ? customControls.media.title = v.tmgMediaTitle : customControls.media = {
                         title: v.tmgMediaTitle ?? medium.title
                     }
+                    medium.removeAttribute("data-tmg-media-title")
                 }
                 if (v.tmgMediaArtwork ?? medium.poster) {
                     customControls.media ? customControls.media.artwork = [{src: v.tmgMediaArtwork ?? medium.poster}] : customControls.media = {
                         artwork: [{src: v.tmgMediaArtwork ?? medium.poster}]
                     }
+                    medium.removeAttribute("data-tmg-media-artwork")
                 }
             }
-            videoSettings = customControls && Object.keys(customControls).length > 0 ? {...DEFAULT_SETTINGS, ...customControls} : DEFAULT_SETTINGS 
+            videoSettings = bool() ? DEFAULT_SETTINGS : {...DEFAULT_SETTINGS, ...customControls} 
             if (medium.tmgcontrols ?? true) {
                 launchVideoController(medium, videoSettings)
             } else {
                 console.error("TMG could not deploy custom controls")
                 console.warn(`Consider removing the '${medium.tmgcontrols}' value from the 'tmgcontrols' attribute`)
             }
-        })()
+        })(v)
+    } else {
+        console.error(`TMG could not deploy custom controls on the '${medium.tagName.toLowerCase()}' element as it is not supported`)
+        console.warn("TMG only supports the 'video' element currently")
     }
 }
 
 function launchVideoController(video, videoSettings) {
+    video.poster = videoSettings.initialState ? videoSettings.media.artwork[0].src : ""
     videoSettings.mediaType = video.tagName.toLowerCase()
     videoSettings.playbackState = video.autoplay ? "playing" : "paused"
     console.log(videoSettings)
@@ -105,7 +132,8 @@ function launchVideoController(video, videoSettings) {
     if (!video.autoplay) videoContainer.classList.add('paused')
     if (videoSettings.initialState) videoContainer.classList.add("initial")
     if (videoSettings.initialMode) videoContainer.classList.add(videoSettings.initialMode)
-    video.poster = videoSettings.initialState ? videoSettings.media.artwork[0].src : ""
+    if (videoSettings.progressBar) videoContainer.classList.add("progress-bar")
+    if (!(videoSettings.previewImages?.address && videoSettings.previewImages?.fps)) videoContainer.classList.add("no-previews")
     videoContainer.innerHTML = 
     `
     <!-- Code injected by TMG -->
@@ -198,7 +226,7 @@ function launchVideoController(video, videoSettings) {
         </button>
     </div>
     <div class="video-buffer"></div>
-    <button type="button" class="replay-btn" title="Replay">
+    <button type="button" class="replay-btn" title="Replay(shift + r)">
         <svg class="replay-icon" viewBox="0 -960 960 960" data-tooltip-text="Replay" data-tooltip-position="top">
             <path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/>
         </svg> 
@@ -213,21 +241,23 @@ function launchVideoController(video, videoSettings) {
     </button>        
     </div>
     <div class="video-controls-container">
-        <div class="timeline-container" title="'>' - 5s & Shift + '>' - 10s">
+        <div class="timeline-container" title="'>' - 5s & Shift + '>' - 10s" tabindex="0">
             <div class="timeline">
-                <div class="preview-img-container"><img class="preview-img" alt="Preview-image" src="${DEFAULT_SETTINGS.media.artwork[0].src}"></div>
+                <div class="preview-img-container">
+                    <img class="preview-img" alt="Preview-image" src="${DEFAULT_SETTINGS.media.artwork[0].src}">
+                </div>
                 <div class="thumb-indicator"></div>
             </div>
         </div>
         <div class="controls">
             <button type="button" class="play-pause-btn" title="Play/Pause(p,l,a,y)">
-                <svg class="replay-icon" viewBox="0 -960 960 960" data-tooltip-text="Replay" data-tooltip-position="top">
+                <svg class="replay-icon" viewBox="0 -960 960 960" data-tooltip-text="Replay(shift + r)" data-tooltip-position="top">
                     <path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/>
                 </svg> 
-                <svg class="play-icon" data-tooltip-text="Play(k)" data-tooltip-position="top">
+                <svg class="play-icon" data-tooltip-text="Play(p,l,a,y)" data-tooltip-position="top">
                     <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
                 </svg>
-                <svg class="pause-icon" data-tooltip-text="Pause(k)" data-tooltip-position="top">
+                <svg class="pause-icon" data-tooltip-text="Pause(p,l,a,y)" data-tooltip-position="top">
                     <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
                 </svg>
             </button>
@@ -250,14 +280,15 @@ function launchVideoController(video, videoSettings) {
                 /
                 <div class="total-time">0.00</div>
             </div>
+            <button type="button" class="settings-btn" title="Toggle Settings">
+                <svg class="settings-icon" viewBox="0 -960 960 960" data-tooltip-text="Settings(s)" data-tooltip-position="top">
+                    <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/>
+                </svg>
+            </button>
             <button type="button" class="captions-btn" title="Toggle Closed Captions(c)">
                 <svg data-tooltip-text="Closed Captions(c)" data-tooltip-position="top">
                     <path fill="currentColor" d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
                 </svg>
-            </button>
-            <button type="button" class="settings-btn" title="Toggle Settings">
-                <svg class="settings-icon" viewBox="0 -960 960 960" data-tooltip-text="Settings(s)" data-tooltip-position="top">
-                    <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
             </button>
             <button type="button" class="speed-btn wide-btn" title="Playback Speed(s)">1x</button>
             <button type="button" class="picture-in-picture-btn" title="Toggle Picture-in-Picture(i)">
@@ -351,26 +382,21 @@ function launchVideoController(video, videoSettings) {
     videoObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.target != video) {
-                intersect = entry.isIntersecting
+                parentIntersecting = entry.isIntersecting
                 toggleMiniPlayerMode()
             } else {
-                if (entry.isIntersecting) {
-                    document.addEventListener("keydown", handleKeyDown)
-                    document.addEventListener("keyup", handleKeyUp)
-                }
-                else {
-                    document.removeEventListener("keydown", handleKeyDown)
-                    document.removeEventListener("keyup", handleKeyUp)
-                }
+                videoIntersecting = entry.isIntersecting
+                videoIntersecting ? setKeyEventListeners() : removeKeyEventListeners()
             }
-    })
+        })
     }, {root: null, rootMargin: '0px', threshold: 0})   
 
     let wasPaused = !video.autoplay, 
     previousRate = video.playbackRate,
     isScrubbing = false,
     concerned = false,
-    intersect = false,
+    parentIntersecting = true,
+    videoIntersecting = true,
     playId,
     hoverId,
     restraintId,
@@ -407,6 +433,37 @@ function launchVideoController(video, videoSettings) {
         videoObserver.observe(videoContainer.parentElement)
         videoObserver.observe(video)      
         setEventListeners()
+    }
+
+    function setInitialStates() {
+        videoContainer.querySelector(".total-time").textContent = formatDuration(video.duration)
+        volumeState()
+        if (captions) { 
+            captions.mode = "hidden"
+        } else {
+            captionsBtn.classList.add("hidden")
+            const n = events.findIndex(e => e === "captions")
+            events.splice(n, 1)
+        }
+        if (videoSettings.initialState) {
+            const playNotifier = notifiersContainer.querySelector(".play-notifier")
+            playNotifier.classList.add("spin")
+            playNotifier.addEventListener("animationend", () => {
+                playNotifier.classList.remove("spin")
+            }, {once: true})
+            if (!video.autoplay) handlePlay()
+            videoContainer.classList.remove("initial")
+        }
+    }
+
+    function setKeyEventListeners() {
+        document.addEventListener("keydown", handleKeyDown)
+        document.addEventListener("keyup", handleKeyUp)
+    }
+
+    function removeKeyEventListeners() {
+        document.removeEventListener("keydown", handleKeyDown)
+        document.removeEventListener("keyup", handleKeyUp)
     }
 
     function setEventListeners() {
@@ -455,6 +512,8 @@ function launchVideoController(video, videoSettings) {
         //timeline contanier event listeners
         timelineContainer.addEventListener("pointerdown", handleTimelineScrubbing)
         timelineContainer.addEventListener("mousemove", handleTimelineUpdate)
+        timelineContainer.addEventListener("focus", handleTimelineFocus)
+        timelineContainer.addEventListener("blur", handleTimelineBlur)
 
         //volume event listeners
         volumeSlider.addEventListener("input", handleSliderInput)
@@ -469,27 +528,6 @@ function launchVideoController(video, videoSettings) {
 
         //notifiers event listeners
         notify.init()
-    }
-
-    function setInitialStates() {
-        videoContainer.querySelector(".total-time").textContent = formatDuration(video.duration)
-        volumeState()
-        if(captions) { 
-            captions.mode = "hidden"
-        } else {
-            captionsBtn.classList.add("hidden")
-            const n = events.findIndex(e => e === "captions")
-            events.splice(n, 1)
-        }
-        if (videoSettings.initialState) {
-            const playNotifier = notifiersContainer.querySelector(".play-notifier")
-            playNotifier.classList.add("spin")
-            playNotifier.addEventListener("animationend", () => {
-                playNotifier.classList.remove("spin")
-            }, {once: true})
-            if (!video.autoplay) handlePlay()
-            videoContainer.classList.remove("initial")
-        }
     }
 
     function getControlsSize() {
@@ -540,7 +578,7 @@ function launchVideoController(video, videoSettings) {
     }
 
     function handleReplay() {
-        moveVideoTime({action: "start"})
+        moveVideoTime({action: "moveTo", details: {to: "start"}})
         video.play()
     }
 
@@ -605,7 +643,7 @@ function launchVideoController(video, videoSettings) {
         timelineContainer.style.setProperty("--preview-img-position", previewImgPercent)
         previewImgContainer.dataset.previewTime = previewTime  
         if (isScrubbing) timelineContainer.style.setProperty("--progress-position", percent)
-        if (videoSettings.previewImages) {
+        if (videoSettings.previewImages?.address && videoSettings.previewImages?.fps) {
             const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / videoSettings.previewImages.fps))
             const previewImgSrc = videoSettings.previewImages.address.replace('$', previewImgNumber)
             previewImg.src = previewImgSrc
@@ -616,10 +654,36 @@ function launchVideoController(video, videoSettings) {
             arrowPosition = `${Math.max(percent * rect.width, arrowPositionMin)}px`
         } else if (percent > (1 - previewImgMin)) {
             arrowPosition = `${Math.min((previewImgContainer.offsetWidth/2 + (percent * rect.width) - previewImgContainer.offsetLeft), previewImgContainer.offsetWidth - arrowPositionMin - 2)}px`
-        } else {
-            arrowPosition = '50%'
-        }
+        } else arrowPosition = '50%'
         previewImgContainer.style.setProperty("--preview-img-arrow-position", arrowPosition)
+    }
+
+    function handleTimelineFocus() {
+        if (timelineContainer.matches(":focus-visible")) {
+            removeKeyEventListeners()
+            document.addEventListener("keydown", handleTimelineKeyDown)
+        }
+    }
+
+    function handleTimelineKeyDown(e) {
+        e.stopImmediatePropagation()
+        switch (e.key.toString().toLowerCase()) {
+            case "arrowleft":
+            case "arrowdown":
+                e.preventDefault()
+                video.currentTime -= e.shiftKey ? 5 : 1
+            break
+            case "arrowright":
+            case "arrowup":
+                e.preventDefault()
+                video.currentTime += e.shiftKey ? 5 : 1
+            break
+        }
+    }
+
+    function handleTimelineBlur() {
+        document.removeEventListener('keydown', handleTimelineKeyDown)
+        if(videoIntersecting) setKeyEventListeners()
     }
 
     function handleTimeUpdate() {
@@ -683,7 +747,7 @@ function launchVideoController(video, videoSettings) {
             speedCheck = true
             wasPaused = video.paused
             if (wasPaused) togglePlay(true)
-            if (x) {
+            if (x && videoSettings.beta) {
                 x - rect.left >= video.offsetWidth*0.5 ? fastForward() : rewind()
             } else fastForward()
             function fastForward() {
@@ -702,6 +766,7 @@ function launchVideoController(video, videoSettings) {
             }        
             speedNotifier.classList.add("active")
             videoContainer.classList.add("movement")
+            if(videoSettings.beta) videoContainer.classList.add("progress-bar")
         }
     }
 
@@ -730,6 +795,7 @@ function launchVideoController(video, videoSettings) {
             }
             speedNotifier.classList.remove("active")
             videoContainer.classList.remove('movement')
+            if(videoSettings.beta) videoContainer.classList.remove("progress-bar")
         }
     }
 
@@ -875,13 +941,13 @@ function launchVideoController(video, videoSettings) {
             removeMiniPlayer()
             return
         }
-        if ((!videoContainer.classList.contains("mini-player") && !video.paused && window.innerWidth >= threshold && !document.pictureInPictureElement && !intersect) || (bool === true)) {
+        if ((!videoContainer.classList.contains("mini-player") && !video.paused && window.innerWidth >= threshold && !document.pictureInPictureElement && !parentIntersecting) || (bool === true)) {
             videoContainer.classList.add("mini-player")
             videoContainer.addEventListener("mousedown", moveMiniPlayer)
             videoContainer.addEventListener("touchstart", moveMiniPlayer, {passive: false})
             return
         } 
-        if ((videoContainer.classList.contains("mini-player") && intersect) || (videoContainer.classList.contains("mini-player") && window.innerWidth < threshold)) cleanUpMiniPlayer()
+        if ((videoContainer.classList.contains("mini-player") && parentIntersecting) || (videoContainer.classList.contains("mini-player") && window.innerWidth < threshold)) cleanUpMiniPlayer()
         function removeMiniPlayer() {
             cleanUpMiniPlayer()
             if (!video.paused && !concerned) togglePlay(false)
@@ -976,10 +1042,12 @@ function launchVideoController(video, videoSettings) {
                 if (smCounter === 2 && !smCheck) speedUp()
                 break
             case "arrowleft":
+                e.preventDefault()
                 e.shiftKey ? skip(-10) : skip(-5)
                 fire("bwd")
                 break
             case "arrowright":
+                e.preventDefault()
                 e.shiftKey ? skip(10) : skip(5)
                 fire("fwd")
                 break
@@ -1034,7 +1102,7 @@ function launchVideoController(video, videoSettings) {
                 e.shiftKey ?  toggleMiniPlayerMode(false, "smooth") : toggleMiniPlayerMode(false, "instant")
                 break
             case "r":
-                toggleMiniPlayerMode(false)
+                e.shiftKey ? handleReplay() : toggleMiniPlayerMode(false) 
                 break
             case "i":
                 if (!e.shiftKey) togglePictureInPictureMode()
@@ -1082,17 +1150,20 @@ function launchVideoController(video, videoSettings) {
 
     function handlePointerDown(e) {
         if (!videoContainer.classList.contains("mini-player")) {
-            videoContainer.addEventListener("mousemove", handlePointerMove)
             videoContainer.addEventListener("mouseup", handlePointerUp)
             videoContainer.addEventListener("mouseleave", handlePointerUp)                
-            videoContainer.addEventListener("touchmove", handlePointerMove, {passive: true})
             videoContainer.addEventListener("touchend", handlePointerUp)
+            if (videoSettings.beta) {
+            videoContainer.addEventListener("mousemove", handlePointerMove)
+            videoContainer.addEventListener("touchmove", handlePointerMove, {passive: true})
+            }
             smCheck = true
             const x = e.clientX ?? e.changedTouches[0].clientX
-            speedTimeoutId = setTimeout(speedUp, 1000, x)
+            speedTimeoutId = videoSettings.beta ? setTimeout(speedUp, 1000, x) : setTimeout(speedUp, 1000)
             const rect = video.getBoundingClientRect()
             speedPosition = x - rect.left >= video.offsetWidth * 0.5 ? "right" : "left"
             function handlePointerMove(e) {
+                if (videoSettings.beta) {
                 const x = e.clientX ?? e.changedTouches[0].clientX
                 const currPos = x - rect.left >= video.offsetWidth * 0.5 ? "right" : "left"
                 if (currPos !== speedPosition) {
@@ -1100,13 +1171,16 @@ function launchVideoController(video, videoSettings) {
                     slowDown()
                     setTimeout(speedUp, 0, x)
                 }
+                }
             }
             function handlePointerUp() {
-                videoContainer.removeEventListener("mousemove", handlePointerMove)
                 videoContainer.removeEventListener("mouseup", handlePointerUp)
-                videoContainer.removeEventListener("mouseleave", handlePointerUp)                    
-                videoContainer.removeEventListener("touchmove", handlePointerMove, {passive: true})
+                videoContainer.removeEventListener("mouseleave", handlePointerUp)      
                 videoContainer.removeEventListener("touchend", handlePointerUp)
+                if (videoSettings.beta) {
+                videoContainer.removeEventListener("mousemove", handlePointerMove)              
+                videoContainer.removeEventListener("touchmove", handlePointerMove, {passive: true})
+                }
                 smCheck = false
                 if (speedTimeoutId) clearTimeout(speedTimeoutId)
                 if (speedCheck && smCounter < 1) slowDown()                        
