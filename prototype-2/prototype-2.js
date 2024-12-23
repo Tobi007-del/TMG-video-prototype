@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
     media: {
         artwork: [
             {
-                src: "/TMG-video-prototype/assets/icons/movie-tape.png"
+                src: "/TMG_MEDIA_PROTOTYPE/assets/icons/movie-tape.png"
             }
         ]
     },
@@ -134,7 +134,7 @@ function deployControls(medium) {
             videoSettings.playbackState = medium.autoplay ? "playing" : "paused"
             if (value === '' || value === 'true') {
                 medium.poster = videoSettings.initialState ? (medium.poster || videoSettings.media.artwork[0].src) : ""
-                loadCSSStyleSheet("/TMG-video-prototype/prototype-2/prototype-2-video.css").then(() => launchVideoController(medium, videoSettings))
+                loadCSSStyleSheet("/TMG_MEDIA_PROTOTYPE/prototype-2/prototype-2-video.css").then(() => launchVideoController(medium, videoSettings))
                 console.log(videoSettings)
             } else {
                 console.error("TMG could not deploy custom controls")
@@ -366,7 +366,7 @@ function launchVideoController(video, videoSettings) {
     notifiersContainer = videoContainer.querySelector(".notifiers-container"),
     speedNotifier = notifiersContainer.querySelector(".speed-notifier"),
     //some general variables
-    altImgSrc = "/TMG-video-prototype/assets/icons/movie-tape.png",
+    altImgSrc = "/TMG_MEDIA_PROTOTYPE/assets/icons/movie-tape.png",
     getControlsSize = () => {return Number(getComputedStyle(videoContainer).getPropertyValue("--controls-size").replace('px', ''))},
     restraintTime = 3000,
     notifiersTransitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--transition-time").replace('ms', '')) + 10,
