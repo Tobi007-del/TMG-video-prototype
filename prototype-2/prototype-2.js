@@ -22,6 +22,23 @@ const DEFAULT_SETTINGS = {
     progressBar: false,
     beta: false,
     playbackState: null,
+    keyShortcuts: true
+},
+//loading CSSStyleSheet
+_styleCache = {},
+loadCSSStyleSheet = src => {
+    _styleCache[src] = _styleCache[src] || new Promise(function (resolve, reject) {
+        let link = document.createElement("link")
+        link.href = src
+        link.rel = "stylesheet"
+
+        link.onload = () => resolve(link)
+        link.onerror = () =>  reject(new Error(`Load error for TMG CSSStylesheet`))
+
+        document.head.append(link)
+    })
+
+    return _styleCache[src]
 },
 media = document.querySelectorAll("[tmgcontrols]"),
 mobileMediaQuery = () => {return window.matchMedia('(max-width: 480px), (max-width: 940px) and (max-height: 480px) and (orientation: landscape)').matches},
@@ -45,7 +62,7 @@ function deployControls(medium) {
         return
     } 
     if (medium.tagName.toLowerCase() === "video") {
-        v = medium.dataset
+        const v = medium.dataset, value = medium.getAttribute('tmgcontrols').toLowerCase()
         //building controls object
         let fetchedControls, videoSettings
         if (v.tmg?.includes('.json')) {
@@ -61,7 +78,7 @@ function deployControls(medium) {
         }
         (async function buildControlOptions(v) {
             const customControls = await fetchedControls ??  {} 
-            let bool = () => {return JSON.stringify(customControls) === "{}"}
+            let bool = () => {return customControls && Object.keys(customControls).length === 0}
             if (bool()) {
                 if (v.tmgActivated) {
                     customControls.activated = JSON.parse(v.tmgActivated)
@@ -83,6 +100,10 @@ function deployControls(medium) {
                     customControls.beta = JSON.parse(v.tmgBeta)
                     medium.removeAttribute("data-tmg-beta")
                 }
+                if (v.tmgKeyShortcuts) {
+                    customControls.keyShortcuts = JSON.parse(v.tmgKeyShortcuts)
+                    medium.removeAttribute("data-tmg-key-shortcuts")
+                }
                 if (v.tmgPreviewImagesAddress) {
                     customControls.previewImages ? customControls.previewImages.address = v.tmgPreviewImagesAddress : customControls.previewImages = {
                         address: v.tmgPreviewImagesAddress
@@ -95,9 +116,9 @@ function deployControls(medium) {
                     }
                     medium.removeAttribute("data-tmg-preview-images-fps")
                 } 
-                if (v.tmgMediaTitle ?? medium.title) {
+                if (v.tmgMediaTitle) {
                     customControls.media ? customControls.media.title = v.tmgMediaTitle : customControls.media = {
-                        title: v.tmgMediaTitle ?? medium.title
+                        title: v.tmgMediaTitle
                     }
                     medium.removeAttribute("data-tmg-media-title")
                 }
@@ -109,11 +130,15 @@ function deployControls(medium) {
                 }
             }
             videoSettings = bool() ? DEFAULT_SETTINGS : {...DEFAULT_SETTINGS, ...customControls} 
-            if (medium.tmgcontrols ?? true) {
-                launchVideoController(medium, videoSettings)
+            videoSettings.mediaType = "video"
+            videoSettings.playbackState = medium.autoplay ? "playing" : "paused"
+            if (value === '' || value === 'true') {
+                medium.poster = videoSettings.initialState ? (medium.poster || videoSettings.media.artwork[0].src) : ""
+                loadCSSStyleSheet("/TMG-video-prototype/prototype-2/prototype-2-video.css").then(() => launchVideoController(medium, videoSettings))
+                console.log(videoSettings)
             } else {
                 console.error("TMG could not deploy custom controls")
-                console.warn(`Consider removing the '${medium.tmgcontrols}' value from the 'tmgcontrols' attribute`)
+                console.warn(`Consider removing the '${value}' value from the 'tmgcontrols' attribute`)
             }
         })(v)
     } else {
@@ -123,10 +148,6 @@ function deployControls(medium) {
 }
 
 function launchVideoController(video, videoSettings) {
-    video.poster = videoSettings.initialState ? videoSettings.media.artwork[0].src : ""
-    videoSettings.mediaType = video.tagName.toLowerCase()
-    videoSettings.playbackState = video.autoplay ? "playing" : "paused"
-    console.log(videoSettings)
     const videoContainer = document.createElement('div')
     videoContainer.classList = "video-container"
     if (!video.autoplay) videoContainer.classList.add('paused')
@@ -346,6 +367,7 @@ function launchVideoController(video, videoSettings) {
     speedNotifier = notifiersContainer.querySelector(".speed-notifier"),
     //some general variables
     altImgSrc = "/TMG-video-prototype/assets/icons/movie-tape.png",
+    getControlsSize = () => {return Number(getComputedStyle(videoContainer).getPropertyValue("--controls-size").replace('px', ''))},
     restraintTime = 3000,
     notifiersTransitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--transition-time").replace('ms', '')) + 10,
     notifierArrowsTransitionTime = Number(getComputedStyle(notifiersContainer).getPropertyValue("--arrows-transition-time").replace('ms', '')) + 10,        
@@ -386,11 +408,11 @@ function launchVideoController(video, videoSettings) {
                 toggleMiniPlayerMode()
             } else {
                 videoIntersecting = entry.isIntersecting
-                videoIntersecting ? setKeyEventListeners() : removeKeyEventListeners()
+                videoIntersecting && videoSettings.keyShortcuts ? setKeyEventListeners() : removeKeyEventListeners()
             }
         })
     }, {root: null, rootMargin: '0px', threshold: 0})   
-
+    
     let wasPaused = !video.autoplay, 
     previousRate = video.playbackRate,
     isScrubbing = false,
@@ -457,8 +479,10 @@ function launchVideoController(video, videoSettings) {
     }
 
     function setKeyEventListeners() {
+        if (videoSettings.keyShortcuts) {
         document.addEventListener("keydown", handleKeyDown)
         document.addEventListener("keyup", handleKeyUp)
+        }
     }
 
     function removeKeyEventListeners() {
@@ -528,10 +552,6 @@ function launchVideoController(video, videoSettings) {
 
         //notifiers event listeners
         notify.init()
-    }
-
-    function getControlsSize() {
-        return Number(getComputedStyle(videoContainer).getPropertyValue("--controls-size").replace('px', ''))
     }
 
     //resizing controls
@@ -683,7 +703,7 @@ function launchVideoController(video, videoSettings) {
 
     function handleTimelineBlur() {
         document.removeEventListener('keydown', handleTimelineKeyDown)
-        if(videoIntersecting) setKeyEventListeners()
+        if(videoIntersecting && videoSettings.keyShortcuts) setKeyEventListeners()
     }
 
     function handleTimeUpdate() {
