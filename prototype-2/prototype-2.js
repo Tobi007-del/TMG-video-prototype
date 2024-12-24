@@ -965,6 +965,7 @@ function launchVideoController(video, videoSettings) {
 
     //mini player mode
     function toggleMiniPlayerMode(bool, behaviour) {
+    if (videoSettings.modes.includes("mini-player")) {
     const threshold = 240
     if (!document.fullscreenElement) {
         if (bool === false) {
@@ -979,7 +980,7 @@ function launchVideoController(video, videoSettings) {
             removeMiniPlayer()
             return
         }
-        if ((!videoContainer.classList.contains("T_M_G-mini-player") && !video.paused && window.innerWidth >= threshold && !document.pictureInPictureElement && !parentIntersecting && videoSettings.modes.includes("mini-player")) || (bool === true)) {
+        if ((!videoContainer.classList.contains("T_M_G-mini-player") && !video.paused && window.innerWidth >= threshold && !document.pictureInPictureElement && !parentIntersecting) || (bool === true)) {
             videoContainer.classList.add("T_M_G-mini-player")
             videoContainer.addEventListener("mousedown", moveMiniPlayer)
             videoContainer.addEventListener("touchstart", moveMiniPlayer, {passive: false})
@@ -996,6 +997,7 @@ function launchVideoController(video, videoSettings) {
             videoContainer.removeEventListener("mousedown", moveMiniPlayer)
             videoContainer.removeEventListener("touchstart", moveMiniPlayer, {passive: false})
         }            
+    }
     }
     }    
 
